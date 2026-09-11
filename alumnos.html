@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro - Alumnos</title>
+    <title>Ficha de Inscripción - Club Deportivo de Hipica Azkorra de Iurreta</title>
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
@@ -50,7 +50,7 @@
         }
 
         .container {
-            max-width: 650px;
+            max-width: 800px;
             background: #fff;
             padding: 30px;
             border-radius: 8px;
@@ -58,27 +58,40 @@
             margin: 0 auto 30px auto;
         }
 
+        h1,
         h2,
         h3 {
             color: #4a3728;
             border-bottom: 2px solid #d4c5b9;
             padding-bottom: 8px;
+            text-align: center;
         }
 
         .form-row {
             display: flex;
+            flex-wrap: wrap;
             gap: 15px;
+            margin-bottom: 10px;
         }
 
         .form-group {
             margin-bottom: 15px;
-            flex: 1;
+            flex: 1 1 300px;
+        }
+
+        .form-group.small {
+            flex: 1 1 150px;
+        }
+
+        .form-group.wide {
+            flex: 1 1 100%;
         }
 
         label {
             display: block;
             margin-bottom: 5px;
             font-weight: bold;
+            font-size: 0.9em;
         }
 
         input,
@@ -126,12 +139,13 @@
             border-collapse: collapse;
             margin-top: 20px;
             background: white;
+            font-size: 0.9em;
         }
 
         th,
         td {
             border: 1px solid #ddd;
-            padding: 12px;
+            padding: 10px;
             text-align: left;
         }
 
@@ -147,11 +161,12 @@
         .actions-cell {
             display: flex;
             gap: 5px;
+            flex-wrap: wrap;
         }
 
         .actions-btn {
-            padding: 6px 10px;
-            font-size: 12px;
+            padding: 4px 8px;
+            font-size: 11px;
             margin: 0;
             width: auto;
         }
@@ -160,50 +175,25 @@
             background-color: #f39c12;
         }
 
-        .btn-edit:hover {
-            background-color: #d68910;
-        }
-
         .btn-delete {
             background-color: #c0392b;
-        }
-
-        .btn-delete:hover {
-            background-color: #a33226;
         }
 
         .btn-view {
             background-color: #3498db;
         }
 
-        .btn-view:hover {
-            background-color: #2980b9;
-        }
-
         .btn-history {
             background-color: #9b59b6;
-        }
-
-        .btn-history:hover {
-            background-color: #8e44ad;
         }
 
         .btn-products {
             background-color: #27ae60;
         }
 
-        .btn-products:hover {
-            background-color: #229954;
-        }
-
         .btn-seguimiento {
             background-color: #3498db;
         }
-
-        .btn-seguimiento:hover {
-            background-color: #2980b9;
-        }
-
 
         .modal {
             display: none;
@@ -218,19 +208,15 @@
 
         .modal-content {
             background-color: #fff;
-            margin: 10% auto;
+            margin: 5% auto;
             padding: 25px;
             border-radius: 8px;
-            width: 500px;
-            max-width: 90%;
+            width: 700px;
+            max-width: 95%;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
             position: relative;
-            text-align: center;
-        }
-
-        .modal-content p {
-            margin: 10px 0;
-            font-size: 1.1em;
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .close {
@@ -242,8 +228,24 @@
             color: #888;
         }
 
-        .close:hover {
-            color: #000;
+        .section-header {
+            background-color: #f0ede5;
+            padding: 10px;
+            margin: 20px 0 15px 0;
+            border-left: 4px solid #4a3728;
+            font-weight: bold;
+        }
+
+        .iban-grid {
+            display: grid;
+            grid-template-columns: 80px 80px 80px 60px 150px;
+            gap: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .iban-grid {
+                grid-template-columns: 1fr 1fr;
+            }
         }
     </style>
 </head>
@@ -263,75 +265,116 @@
     </div>
 
     <div class="container" style="margin-bottom: 20px; border-left: 5px solid #3498db;">
-        <h3 style="margin-top: 0; color: #3498db; border-bottom: none; padding-bottom: 0;">🔍 Buscar Alumno Existente
-        </h3>
+        <h3 style="margin-top: 0; color: #3498db; border-bottom: none; padding-bottom: 0;">🔍 Buscar Alumno / Bilatu
+            Ikaslea</h3>
         <input type="text" id="buscadorAlumno" placeholder="Buscar por DNI, Apellidos o Teléfono..."
             oninput="mostrarAlumnos()" style="margin-top: 10px; border: 2px solid #3498db; font-size: 1.1em;">
     </div>
 
     <div class="container" style="max-width: 1200px;">
-        <h3>📋 Alumnos Registrados</h3>
-        <table id="tablaAlumnos">
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Apellidos</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
+        <h3>📋 Alumnos Registrados / Erregistraturiko Ikasleak</h3>
+        <div style="overflow-x: auto;">
+            <table id="tablaAlumnos">
+                <thead>
+                    <tr>
+                        <th>Nombre / Izena</th>
+                        <th>Apellidos / Abizenak</th>
+                        <th>Próxima Clase</th>
+                        <th>Último Producto</th>
+                        <th style="text-align:center;">Al Corriente</th>
+                        <th style="text-align:center;">Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
     </div>
 
     <div class="container">
-        <h2>👤 Registro de Alumnos</h2>
+        <h1>Club Deportivo de Hipica Azkorra de Iurreta</h1>
+        <h2>FICHA DE INSCRIPCION / IZENA EMATEKO ORRIA</h2>
+
         <form id="alumnoForm">
             <input type="hidden" id="alumnoId">
+
+            <div class="section-header">DATOS DEL ALUMNO / IKASLEAREN DATUAK</div>
+
             <div class="form-row">
                 <div class="form-group">
-                    <label for="dni" id="dniLabel">DNI:</label>
+                    <label for="dni">DNI / NAN:</label>
                     <input type="text" id="dni" required placeholder="Ej. 12345678A">
                 </div>
-            </div>
-            <div class="form-row">
                 <div class="form-group">
-                    <label for="nombre">Nombre:</label>
-                    <input type="text" id="nombre" required placeholder="Ej. Juan">
-                </div>
-                <div class="form-group">
-                    <label for="apellido">Apellidos:</label>
-                    <input type="text" id="apellido" required placeholder="Ej. Pérez">
+                    <label for="fechaNacimiento">Fecha de nacimiento / Jaiotze data:</label>
+                    <input type="date" id="fechaNacimiento" required>
                 </div>
             </div>
+
             <div class="form-row">
                 <div class="form-group">
-                    <label for="edad">Edad:</label>
-                    <input type="number" id="edad" min="3" required placeholder="Ej. 14">
+                    <label for="nombre">Nombre / Izena:</label>
+                    <input type="text" id="nombre" required placeholder="Juan">
+                </div>
+                <div class="form-group">
+                    <label for="apellido">Apellido / Abizenak:</label>
+                    <input type="text" id="apellido" required placeholder="Pérez">
                 </div>
             </div>
+
+            <div class="form-row">
+                <div class="form-group wide">
+                    <label for="direccion">Dirección / Helbidea:</label>
+                    <input type="text" id="direccion" placeholder="Calle Ejemplo, 123">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group small">
+                    <label for="cp">CP / P.K.:</label>
+                    <input type="text" id="cp" placeholder="48200">
+                </div>
+                <div class="form-group">
+                    <label for="poblacion">Población / Herria:</label>
+                    <input type="text" id="poblacion" placeholder="Iurreta">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group wide">
+                    <label for="email">Email / E-posta:</label>
+                    <input type="email" id="email" placeholder="email@ejemplo.com">
+                </div>
+            </div>
+
             <div class="form-row">
                 <div class="form-group">
-                    <label for="nivel">Nivel:</label>
+                    <label for="telefono">Telefono / Telefonoa:</label>
+                    <input type="tel" id="telefono" required placeholder="600123456">
+                </div>
+                <div class="form-group">
+                    <label for="telefono2">Telefono 2 / 2.Telefonoa:</label>
+                    <input type="tel" id="telefono2" placeholder="600987654">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="licencia">Nª Licencia / Federazio Lizentzia zkia:</label>
+                    <input type="text" id="licencia" placeholder="12345">
+                </div>
+                <div class="form-group">
+                    <label for="galopes">Galopes:</label>
+                    <input type="text" id="galopes" placeholder="Galope 1, 2...">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="nivel">Nivel Interno:</label>
                     <select id="nivel" required>
                         <option value="">-- Selecciona Nivel --</option>
                     </select>
-                </div>
-            </div>
-            <div class="form-row" id="tutorRow" style="display: none;">
-                <div class="form-group">
-                    <label for="tutorNombre" id="tutorNombreLabel">Nombre y Apellidos del Tutor:</label>
-                    <input type="text" id="tutorNombre" placeholder="Ej. Padre/Madre/Tutor legal">
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="telefono" id="telefonoLabel">Teléfono:</label>
-                    <input type="tel" id="telefono" required placeholder="Ej. 600123456">
-                </div>
-                <div class="form-group">
-                    <label for="email" id="emailLabel">Email:</label>
-                    <input type="email" id="email" placeholder="email@ejemplo.com">
                 </div>
                 <div class="form-group">
                     <label for="estado">Estado para Asignación:</label>
@@ -341,43 +384,197 @@
                     </select>
                 </div>
             </div>
+
+            <div id="tutorSection" style="display: none;">
+                <div class="section-header">
+                    DATOS DE TUTORES / TUTOREEN DATUAK
+                    <div style="font-size: 0.8em; font-weight: normal;">(Solo si es menor / Adingabekoa bada)</div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tutorDni">DNI / NAN (Tutor):</label>
+                        <input type="text" id="tutorDni">
+                    </div>
+                    <div class="form-group">
+                        <label for="tutorNombre">Nombre / Izena (Tutor):</label>
+                        <input type="text" id="tutorNombre">
+                    </div>
+                    <div class="form-group">
+                        <label for="tutorApellido">Apellido / Abizenak (Tutor):</label>
+                        <input type="text" id="tutorApellido">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group wide">
+                        <label for="tutorDireccion">Dirección / Helbidea (Tutor):</label>
+                        <input type="text" id="tutorDireccion">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group small">
+                        <label for="tutorCP">CP / P.K. (Tutor):</label>
+                        <input type="text" id="tutorCP">
+                    </div>
+                    <div class="form-group">
+                        <label for="tutorPoblacion">Población / Herria (Tutor):</label>
+                        <input type="text" id="tutorPoblacion">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tutorEmail">Email / E-posta (Tutor):</label>
+                        <input type="email" id="tutorEmail">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tutorTelefono">Telefono / Telefonoa (Tutor):</label>
+                        <input type="tel" id="tutorTelefono">
+                    </div>
+                    <div class="form-group">
+                        <label for="tutorTelefono2">Telefono 2 / 2.Telefonoa (Tutor):</label>
+                        <input type="tel" id="tutorTelefono2">
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-header">FORMA DE PAGO / ORDAINTZEKO MODUA</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label><input type="radio" name="formaPago" value="Efectivo" checked style="width: auto;"> Efectivo
+                        / Eskudirutan</label>
+                    <label><input type="radio" name="formaPago" value="Domiciliacion" style="width: auto;">
+                        Domiciliación / Helbideratzea</label>
+                </div>
+            </div>
+
+            <div id="domiciliacionSection" style="display: none;">
+                <div class="form-group wide">
+                    <label for="titularCuenta">Titular de la cuenta / Kontuaren titularra:</label>
+                    <input type="text" id="titularCuenta">
+                </div>
+                <label>Cuenta en la que se cargará la cuota mensual / Hileroko kuota ordaintzeko kontua:</label>
+                <div class="iban-grid">
+                    <div>
+                        <label style="font-size: 0.7em;">IBAN</label>
+                        <input type="text" id="iban" placeholder="ES00" maxlength="4">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.7em;">Entidad</label>
+                        <input type="text" id="entidad" maxlength="4">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.7em;">Sucursal</label>
+                        <input type="text" id="sucursal" maxlength="4">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.7em;">DC</label>
+                        <input type="text" id="dc" maxlength="2">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.7em;">Cuenta / Kontua</label>
+                        <input type="text" id="cuenta" maxlength="10">
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-header">NOTAS / OHARRAK</div>
             <div class="form-group">
                 <label for="notaMedica">Nota Médica / Alergias:</label>
-                <textarea id="notaMedica"
-                    placeholder="Indica aquí cualquier condición médica, alergias, medicación o información importante para el profesor..."></textarea>
+                <textarea id="notaMedica" placeholder="Indica aquí cualquier condición médica..."></textarea>
             </div>
-            <div class="form-group">
-                <label for="notaAlimentaria">Nota Alimentaria:</label>
-                <textarea id="notaAlimentaria"
-                    placeholder="Indica aquí intolerancias, dietas específicas o necesidades alimentarias..."></textarea>
+
+            <div class="section-header">PROTECCIÓN DE DATOS / DATUEN BABESA</div>
+            <div class="form-group wide">
+                <label style="font-weight: normal;">
+                    <input type="checkbox" id="aceptoRGPD" required style="width: auto; margin-right: 10px;">
+                    He leído y acepto el <a href="#" onclick="abrirModalRGPD(); return false;">Anexo de Protección de
+                        Datos Personales</a>.
+                </label>
             </div>
-            <button type="submit" id="submitBtn">Registrar Alumno</button>
+            <div class="form-group wide">
+                <label style="font-weight: normal;">
+                    <input type="checkbox" id="aceptoPublicidad" style="width: auto; margin-right: 10px;">
+                    Autorizo el envío de información comercial-promocional de nuestros servicios, productos y
+                    actividades.
+                </label>
+            </div>
+            <div class="form-group wide">
+                <label style="font-weight: normal;">
+                    <input type="checkbox" id="aceptoImagen" style="width: auto; margin-right: 10px;">
+                    Autorizo el tratamiento de la imagen del alumno/a para publicidad corporativa en web y otros
+                    soportes.
+                </label>
+            </div>
+
+            <div class="section-header">NORMATIVA E INFORMACIÓN / ARAUDIA ETA INFORMAZIOA</div>
+            <div
+                style="font-size: 0.85em; background: #fff; padding: 15px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 15px;">
+                <p>El/la abajo firmante declara haber leído las normas de funcionamiento, las acepta y así mismo se
+                    compromete a cumplirlas. Asumo expresamente los riesgos inherentes que conlleva la práctica de la
+                    equitación, exonerando de esta forma al Club Deportivo de Hipica Azkorra de Iurreta de cualquier
+                    responsabilidad en cualquier accidente derivado de esta práctica deportiva.</p>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Lugar y Fecha / Lekua eta Data:</label>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span>Iurreta, a </span>
+                            <input type="date" id="fechaFirma" required style="width: auto; flex: 1;">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group wide">
+                    <label>Firma / Sinadura:</label>
+                    <div style="border: 2px dashed #ccc; background: #f9f9f9; border-radius: 4px; position: relative;">
+                        <canvas id="signatureCanvas" width="500" height="150"
+                            style="display: block; width: 100%; height: 150px; cursor: crosshair;"></canvas>
+                        <button type="button" onclick="clearSignature()"
+                            style="position: absolute; top: 5px; right: 5px; padding: 5px 10px; font-size: 10px; width: auto; margin: 0; background: #7f8c8d;">Limpiar
+                            / Garbitu</button>
+                    </div>
+                    <input type="hidden" id="signatureData">
+                </div>
+
+                <div class="form-group wide">
+                    <label style="font-weight: bold;">
+                        <input type="checkbox" id="aceptoNormativa" required style="width: auto; margin-right: 10px;">
+                        Declaro que acepto las normas y asumo los riesgos
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" id="submitBtn">Registrar Alumno / Ikaslea Erregistratu</button>
         </form>
+
+        <p style="text-align: center; font-size: 0.8em; color: #888; margin-top: 20px;">
+            Ficha de inscripción / Izena emateko orria © 2022 Club Deportivo de Hipica Azkorra de Iurreta
+        </p>
     </div>
 
-    <!-- Modal para ver Ficha -->
+    <!-- Modals -->
     <div id="modalFicha" class="modal">
         <div class="modal-content">
             <span class="close" onclick="cerrarFicha()">&times;</span>
-            <h3 style="margin-top:0; color:#4a3728;">📄 Ficha de Contacto</h3>
+            <h3 style="margin-top:0; color:#4a3728;">📄 Ficha de Contacto / Harremanetarako fitxa</h3>
             <hr style="border:0; border-top:1px solid #eee; margin-bottom:15px;">
             <div id="fichaDetalles"></div>
-            <button onclick="cerrarFicha()" style="margin-top:20px; background-color:#7f8c8d;">Cerrar</button>
+            <button onclick="cerrarFicha()" style="margin-top:20px; background-color:#7f8c8d;">Cerrar / Itxi</button>
         </div>
     </div>
 
-    <!-- Modal para ver Historial -->
     <div id="modalHistorial" class="modal">
         <div class="modal-content">
             <span class="close" onclick="cerrarHistorial()">&times;</span>
-            <h3 style="margin-top:0; color:#9b59b6;">📜 Historial de Cursos</h3>
+            <h3 style="margin-top:0; color:#9b59b6;">📜 Historial de Compras</h3>
             <hr style="border:0; border-top:1px solid #eee; margin-bottom:15px;">
             <div id="historialDetalles" style="text-align: left; max-height: 400px; overflow-y: auto;"></div>
             <button onclick="cerrarHistorial()" style="margin-top:20px; background-color:#7f8c8d;">Cerrar</button>
         </div>
     </div>
 
-    <!-- Modal para Seguimiento -->
     <div id="modalSeguimiento" class="modal">
         <div class="modal-content">
             <span class="close" onclick="cerrarSeguimiento()">&times;</span>
@@ -388,17 +585,15 @@
         </div>
     </div>
 
-    <!-- Modal para Productos/Pagos -->
     <div id="modalProductos" class="modal">
-        <div class="modal-content" style="width: 700px; max-width: 95%;">
+        <div class="modal-content">
             <span class="close" onclick="cerrarModalProductos()">&times;</span>
             <h3 style="margin-top:0; color:#27ae60;">🛍️ Productos y Pagos de <span id="nombreAlumnoProductos"></span>
             </h3>
             <hr style="border:0; border-top:1px solid #eee; margin-bottom:15px;">
             <input type="hidden" id="productoAlumnoId">
             <div class="form-group">
-                <label for="categoriaProductoSelect" style="font-weight:bold;">1. Selecciona una categoría de
-                    producto:</label>
+                <label for="categoriaProductoSelect">1. Selecciona una categoría:</label>
                 <select id="categoriaProductoSelect">
                     <option value="">-- Elige una categoría --</option>
                     <option value="bonos">Bonos de Clases</option>
@@ -410,848 +605,542 @@
             <div id="tablaProductosDisponibles"
                 style="max-height: 250px; overflow-y: auto; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 20px; display: none;">
             </div>
-
-            <!-- Tabla de productos del alumno -->
             <div id="productosAlumnoDetalles"
                 style="text-align: left; max-height: 300px; overflow-y: auto; margin-top: 20px;"></div>
-
             <button onclick="cerrarModalProductos()" style="margin-top:20px; background-color:#7f8c8d;">Cerrar</button>
         </div>
     </div>
 
+    <div id="modalRGPD" class="modal">
+        <div class="modal-content" style="text-align: left; font-size: 0.85em; line-height: 1.4;">
+            <span class="close" onclick="cerrarModalRGPD()">&times;</span>
+            <h3 style="text-align: center;">ANEXO PROTECCION DE DATOS PERSONALES</h3>
+            <p><strong>INFORMACIÓN ADICIONAL SOBRE PROTECCIÓN DE DATOS</strong>, según (REGLAMENTO EUROPEO DE PROTECCIÓN
+                DE DATOS 2016/679 (RGPD))</p>
+
+            <p><strong>Responsable del tratamiento de sus datos:</strong><br>
+                Identidad- CIF CLUB DEPORTIVO DE HIPICA AZCORRA DE IURRETA - G95752549<br>
+                Domicilio social: Barrio Gaztañatza s/n - Iurreta<br>
+                Teléfono/fax: 691746611<br>
+                Correo electrónico: hipicazelaialai@gmail.com<br>
+                Página web: http://www.hipicazelaialai.com/<br>
+                Contacto DPO: hipicazelaialai@gmail.com</p>
+
+            <p><strong>Finalidad/es:</strong><br>
+                Los datos personales del alumn@, de su padre/madre y/o sus representantes legales, son tratados con la
+                finalidad gestionar la matricula a la actividad deportiva demandada y prestar los servicios solicitados;
+                la gestión administrativa, contable y fiscal, así como remitirle por cualquier medio, incluidos medios
+                electrónicos, información publicitaria sobre próximas actividades, eventos, promociones y/o noticias
+                relativas al ámbito de la Hipica.</p>
+            <p>En caso de facilitarnos datos personales de terceros, deberá hacerlo con su consentimiento y haberles
+                informado, con carácter previo, de los extremos contenidos en esta cláusula.</p>
+            <p>Asimismo le informamos, que la imagen del alumn@ podría publicarse, previo consentimiento, en nuestra
+                web, así como en folletos o cualquier otro soporte físico o audiovisual con objeto de publicidad
+                corporativa y/o vinculada con el ámbito exclusivo de actividad de la Hipica.</p>
+
+            <p><strong>Plazos o criterios de conservación de los datos:</strong><br>
+                Los datos personales del alumn@, de su madre/padre y/o sus representantes legales, se conservarán
+                mientras se mantenga la relación contractual y durante los plazos previstos en la normativa vigente en
+                cuanto al cumplimiento de obligaciones fiscales y mercantiles: 4 años: Arts. 66 y sig. Ley General
+                Tributaria (obligaciones tributarias); 6 años: Art. 30 Código de Comercio (libros de
+                contabilidad-documentación mercantil); 10 años: Art. 25 Ley de Prevención del Blanqueo de Capitales y
+                Financiación del Terrorismo (documentación de fiscal en el marco de un proceso penal).</p>
+
+            <p><strong>Decisiones:</strong><br>
+                CLUB DEPORTIVO DE HIPICA AZCORRA DE IURRETA no elabora perfiles de su alumnado. No se toman decisiones
+                automatizadas.</p>
+
+            <p><strong>Legitimación para el tratamiento de sus datos:</strong><br>
+                La base legal para el tratamiento de los datos personales, es la ejecución del contrato. Los datos
+                personales del alumn@, de su madre/padre y/o sus representantes legales, son necesarios para gestionar y
+                controlar la relación negocial. La omisión o la negativa a suministrar los datos solicitados,
+                imposibilitará que se cumpla con la/s finalidad/es mencionada/s.</p>
+            <p>La base legal para el tratamiento de sus datos con fines publicitarios-promocionales de las actividades
+                del Club, se funda en su consentimiento.</p>
+            <p>La base legal para el tratamiento de imagen del alum@ y su publicación en nuestra web, así como en
+                folletos o cualquier otro soporte físico o audiovisual con objeto de publicidad corporativa y/o
+                vinculada con el ámbito exclusivo de actividad del club, se funda en el consentimiento.</p>
+
+            <p><strong>Destinatarios de cesiones o transferencias:</strong><br>
+                CLUB DEPORTIVO DE HIPICA AZCORRA DE IURRETA No comunicará sus datos a terceros, salvo obligación legal.
+                Sus datos podrán ser comunicados: a) A las Administraciones Públicas Competentes, en su caso a Bancos/
+                Cajas de Ahorro, y a todas aquellas entidades que la legislación vigente nos exija; b) A entidades
+                sanitarias, en el caso de que el alumno participante se encuentre en situación de necesitar
+                tratamiento-intervención médica.</p>
+
+            <p><strong>Ejercicio de Derechos:</strong><br>
+                El/la interesad@ podrá dirigir en cualquier momento una comunicación por escrito a la dirección de
+                correo electrónico a hipicazelaialai@gmail.com o al domicilio arriba mencionado, donde consten
+                claramente sus datos de contacto y petición detallada, adjuntando en ambos casos fotocopia de su DNI u
+                otro documento identificativo equivalente, para solicitar el ejercicio de cualquiera de estos derechos:
+                Derecho a solicitar el acceso, rectificación, supresión, limitación del tratamiento, oposición y
+                portabilidad de los datos.</p>
+
+            <button onclick="cerrarModalRGPD()" style="margin-top:20px; background-color:#7f8c8d;">Cerrar /
+                Itxi</button>
+        </div>
+    </div>
+
+    <script src="data-manager.js?v=1.5"></script>
     <script>
         const form = document.getElementById('alumnoForm');
         const tabla = document.getElementById('tablaAlumnos').getElementsByTagName('tbody')[0];
         const submitBtn = document.getElementById('submitBtn');
         const alumnoIdInput = document.getElementById('alumnoId');
-        const edadInput = document.getElementById('edad');
-        const tutorRow = document.getElementById('tutorRow');
-        const tutorNombreInput = document.getElementById('tutorNombre');
-        const dniLabel = document.getElementById('dniLabel');
-        const telefonoLabel = document.getElementById('telefonoLabel');
-        const dniInput = document.getElementById('dni');
-        const telefonoInput = document.getElementById('telefono');
-        const emailLabel = document.getElementById('emailLabel');
-        const emailInput = document.getElementById('email');
+        const fechaNacimientoInput = document.getElementById('fechaNacimiento');
+        const tutorSection = document.getElementById('tutorSection');
+        const domiciliacionSection = document.getElementById('domiciliacionSection');
+        const canvas = document.getElementById('signatureCanvas');
+        const ctx = canvas.getContext('2d');
+        let drawing = false;
 
-        // Elementos del modal de productos
-
-        function actualizarCamposTutor() {
-            const edad = parseInt(edadInput.value);
-            if (!isNaN(edad) && edad < 18) {
-                tutorRow.style.display = 'flex';
-                tutorNombreInput.required = true;
-                dniLabel.textContent = 'DNI del Tutor:';
-                telefonoLabel.textContent = 'Teléfono del Tutor:';
-                emailLabel.textContent = 'Email del Tutor:';
-                dniInput.placeholder = 'Ej. DNI del Tutor';
-                telefonoInput.placeholder = 'Ej. Teléfono del Tutor';
-            } else {
-                tutorRow.style.display = 'none';
-                tutorNombreInput.required = false;
-                tutorNombreInput.value = '';
-                emailLabel.textContent = 'Email:';
-                dniLabel.textContent = 'DNI:';
-                telefonoLabel.textContent = 'Teléfono:';
-                dniInput.placeholder = 'Ej. 12345678A';
-                telefonoInput.placeholder = 'Ej. 600123456';
-            }
+        // Signature logic
+        function getMousePos(canvasDom, touchOrMouseEvent) {
+            var rect = canvasDom.getBoundingClientRect();
+            var x = (touchOrMouseEvent.clientX || touchOrMouseEvent.touches[0].clientX) - rect.left;
+            var y = (touchOrMouseEvent.clientY || touchOrMouseEvent.touches[0].clientY) - rect.top;
+            return { x: x, y: y };
         }
 
-        edadInput.addEventListener('input', actualizarCamposTutor);
-        edadInput.addEventListener('change', actualizarCamposTutor);
+        canvas.addEventListener("mousedown", function (e) {
+            drawing = true;
+            lastPos = getMousePos(canvas, e);
+        }, false);
+        canvas.addEventListener("mouseup", function (e) {
+            drawing = false;
+        }, false);
+        canvas.addEventListener("mousemove", function (e) {
+            mousePos = getMousePos(canvas, e);
+            if (drawing) {
+                ctx.moveTo(lastPos.x, lastPos.y);
+                ctx.lineTo(mousePos.x, mousePos.y);
+                ctx.stroke();
+                lastPos = mousePos;
+            }
+        }, false);
 
-        let ultimaDataAlumnos = JSON.stringify(JSON.parse(localStorage.getItem('alumnosEscuela')) || []);
-        let ultimaDataNiveles = JSON.stringify(JSON.parse(localStorage.getItem('nivelesEscuela')) || []);
+        // Touch support
+        canvas.addEventListener("touchstart", function (e) {
+            mousePos = getMousePos(canvas, e);
+            var touch = e.touches[0];
+            var mouseEvent = new MouseEvent("mousedown", {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            canvas.dispatchEvent(mouseEvent);
+        }, false);
+        canvas.addEventListener("touchend", function (e) {
+            var mouseEvent = new MouseEvent("mouseup", {});
+            canvas.dispatchEvent(mouseEvent);
+        }, false);
+        canvas.addEventListener("touchmove", function (e) {
+            var touch = e.touches[0];
+            var mouseEvent = new MouseEvent("mousemove", {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            canvas.dispatchEvent(mouseEvent);
+        }, false);
+
+        function clearSignature() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.beginPath();
+            document.getElementById('signatureData').value = '';
+        }
+
+        function calcularEdad(fecha) {
+            if (!fecha) return 0;
+            const hoy = new Date();
+            const cumple = new Date(fecha);
+            let edad = hoy.getFullYear() - cumple.getFullYear();
+            const m = hoy.getMonth() - cumple.getMonth();
+            if (m < 0 || (m === 0 && hoy.getDate() < cumple.getDate())) edad--;
+            return edad;
+        }
+
+        function toggleTutorSection() {
+            const edad = calcularEdad(fechaNacimientoInput.value);
+            tutorSection.style.display = (edad > 0 && edad < 18) ? 'block' : 'none';
+        }
+
+        fechaNacimientoInput.addEventListener('change', toggleTutorSection);
+
+        document.querySelectorAll('input[name="formaPago"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                domiciliacionSection.style.display = (e.target.value === 'Domiciliacion') ? 'block' : 'none';
+            });
+        });
+
+        function abrirModalRGPD() { document.getElementById('modalRGPD').style.display = 'block'; }
+        function cerrarModalRGPD() { document.getElementById('modalRGPD').style.display = 'none'; }
 
         async function poblarNiveles() {
             const selectNivel = document.getElementById('nivel');
             const valorActual = selectNivel.value;
-
             let niveles = await dataManager.get('nivelesEscuela') || [];
-
-            selectNivel.innerHTML = niveles.map(n => `<option value="${n.nombre}">${n.nombre}</option>`).join('');
-            if (valorActual && niveles.some(n => n.nombre === valorActual)) {
-                selectNivel.value = valorActual;
-            }
-            if (niveles.length === 0) {
-                selectNivel.innerHTML = '<option value="">⚠️ Crea niveles en "Bases"</option>';
-            }
+            selectNivel.innerHTML = '<option value="">-- Selecciona Nivel --</option>' + niveles.map(n => `<option value="${n.nombre}">${n.nombre}</option>`).join('');
+            if (valorActual) selectNivel.value = valorActual;
         }
-
-        window.onload = async function () {
-            await dataManager.initPromise; // Esperar a que la inicialización de Firebase se complete
-
-            await poblarNiveles(); // Poblar desplegables
-            await mostrarAlumnos(); // Mostrar la lista inicial
-
-            // Escuchar cambios en tiempo real de Firebase o localStorage
-            if (dataManager.useFirebase) {
-                dataManager.onSnapshot('alumnosEscuela', (data) => {
-                    const dataActual = JSON.stringify(data || []);
-                    if (dataActual !== ultimaDataAlumnos) {
-                        ultimaDataAlumnos = dataActual;
-                        mostrarAlumnos();
-                    }
-                });
-                dataManager.onSnapshot('nivelesEscuela', (data) => {
-                    const dataActual = JSON.stringify(data || []);
-                    if (dataActual !== ultimaDataNiveles) {
-                        ultimaDataNiveles = dataActual;
-                        poblarNiveles();
-                    }
-                });
-                // Añadir listeners para pagos y asistencia para que el seguimiento se actualice
-                dataManager.onSnapshot('pagosAlumnosEscuela', () => { });
-                dataManager.onSnapshot('attendanceEscuela', () => { });
-            }
-        };
-
-        form.addEventListener('submit', async function (e) {
-            e.preventDefault();
-            const id = alumnoIdInput.value;
-            const dni = document.getElementById('dni').value.trim();
-            const nombre = document.getElementById('nombre').value.trim();
-            const apellido = document.getElementById('apellido').value.trim();
-            const edad = parseInt(document.getElementById('edad').value);
-            const nivel = document.getElementById('nivel').value;
-            const estado = document.getElementById('estado').value;
-            const telefono = document.getElementById('telefono').value.trim();
-            const notaMedica = document.getElementById('notaMedica').value.trim();
-            const notaAlimentaria = document.getElementById('notaAlimentaria').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const tutorNombre = (edad < 18) ? tutorNombreInput.value.trim() : '';
-            const nombreCompleto = `${nombre} ${apellido}`;
-
-            let alumnos = await dataManager.get('alumnosEscuela') || [];
-
-            if (id) {
-                const alumnoAnterior = alumnos.find(a => a.id === parseInt(id));
-                const nombreAnterior = `${alumnoAnterior.nombre} ${alumnoAnterior.apellido}`;
-
-                alumnos = alumnos.map(a => a.id === parseInt(id) ? { id: a.id, dni, nombre, apellido, edad, nivel, telefono, email, notaMedica, notaAlimentaria, estado, tutorNombre } : a);
-
-                // Actualizar referencias en asignaciones
-                if (nombreAnterior !== nombreCompleto) {
-                    let asignaciones = await dataManager.get('asignacionesEscuela') || [];
-                    asignaciones = asignaciones.map(a => a.alumno === nombreAnterior ? { ...a, alumno: nombreCompleto } : a);
-                    await dataManager.set('asignacionesEscuela', asignaciones);
-                }
-
-                alert("¡Alumno actualizado!");
-            } else {
-                alumnos.push({ id: Date.now(), dni, nombre, apellido, edad, nivel, telefono, email, notaMedica, notaAlimentaria, estado, tutorNombre });
-                alert("¡Alumno guardado!");
-            }
-
-            await dataManager.set('alumnosEscuela', alumnos);
-            restablecerFormulario();
-            mostrarAlumnos();
-        });
 
         async function mostrarAlumnos() {
             const searchInput = document.getElementById('buscadorAlumno')?.value || '';
-            // Función para normalizar texto: quita mayúsculas y acentos/tildes
             const normalizar = (texto) => (texto || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
             const filtro = normalizar(searchInput);
 
-            const [alumnos, pagos, asistencia, asignaciones, clasesSueltas, todasLasClases] = await Promise.all([
+            const [alumnos, pagos, asistencia, asignaciones, todasLasClases] = await Promise.all([
                 dataManager.get('alumnosEscuela'),
                 dataManager.get('pagosAlumnosEscuela'),
                 dataManager.get('attendanceEscuela'),
                 dataManager.get('asignacionesEscuela'),
-                dataManager.get('clasesSueltasEscuela'), // Necesario para calcular deuda
                 dataManager.get('clasesEscuela')
             ]);
 
             tabla.innerHTML = '';
-
-            const alumnosFiltrados = (alumnos || []).filter(a => {
-                return normalizar(a.dni).includes(filtro) ||
-                    normalizar(a.nombre).includes(filtro) ||
-                    normalizar(a.apellido).includes(filtro) ||
-                    normalizar(a.telefono).includes(filtro);
-            });
-
-            if (alumnosFiltrados.length === 0) {
-                const mensaje = filtro ? 'No se encontraron coincidencias para la búsqueda.' : 'No hay alumnos registrados.';
-                tabla.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#888;">${mensaje}</td></tr>`;
-                return;
-            }
-
-            // Actualizar cabecera de la tabla
-            const thead = tabla.closest('table').querySelector('thead tr');
-            thead.innerHTML = `
-                <th>Nombre</th>
-                <th>Apellidos</th>
-                <th>Próxima Clase</th>
-                <th>Último Producto</th>
-                <th style="text-align:center;">Al Corriente</th>
-                <th style="text-align:center;">Estado</th>
-                <th>Acciones</th>
-            `;
+            const alumnosFiltrados = (alumnos || []).filter(a =>
+                normalizar(a.dni).includes(filtro) ||
+                normalizar(a.nombre).includes(filtro) ||
+                normalizar(a.apellido).includes(filtro) ||
+                normalizar(a.telefono).includes(filtro)
+            );
 
             alumnosFiltrados.forEach(a => {
-                // Lógica para "Producto Adquirido" y "Al Corriente"
                 const nombreCompleto = `${a.nombre} ${a.apellido}`;
                 const misPagos = (pagos || []).filter(p => p.alumnoId === a.id).sort((x, y) => new Date(y.fechaCompra) - new Date(x.fechaCompra));
                 const ultimoProducto = misPagos.length > 0 ? misPagos[0].productoNombre : '---';
 
-                // Lógica para "Al Corriente"
-                let alCorrienteHtml = '<span title="Sin producto activo y sin deuda">⚪</span>'; // Por defecto, gris si no hay bono ni deuda.
+                let alCorrienteHtml = '⚪';
+                const mesActual = new Date().getMonth();
+                const anioActual = new Date().getFullYear();
 
-                const hoy = new Date();
-                const mesActual = hoy.getMonth();
-                const anioActual = hoy.getFullYear();
+                const tieneBonoActivo = misPagos.some(p => p.tipo === 'Bono' && (p.totalClases - (p.clasesUsadas || 0)) > 0);
+                const haPagadoEsteMes = misPagos.some(p => (p.tipo === 'Clase Suelta' || p.tipo === 'Otro') && new Date(p.fechaCompra + 'T12:00:00').getMonth() === mesActual && new Date(p.fechaCompra + 'T12:00:00').getFullYear() === anioActual);
 
-                // --- NUEVA LÓGICA DE PAGO MENSUAL ---
-                // 1. Identificar todos los productos mensuales únicos que el alumno ha contratado alguna vez.
-                const productosMensualesUnicos = [...new Set(misPagos
-                    .filter(p => p.tipo === 'Clase Suelta' || p.tipo === 'Otro')
-                    .map(p => p.productoNombre))];
+                if (tieneBonoActivo || haPagadoEsteMes) alCorrienteHtml = '✅';
+                else if (misPagos.length > 0) alCorrienteHtml = '❌';
 
-                if (productosMensualesUnicos.length > 0) {
-                    // 2. Verificar si TODOS los productos mensuales únicos han sido pagados en el mes actual.
-                    const haPagadoTodoEsteMes = productosMensualesUnicos.every(nombreProducto => {
-                        return misPagos.some(p => p.productoNombre === nombreProducto && new Date(p.fechaCompra + 'T12:00:00').getMonth() === mesActual && new Date(p.fechaCompra + 'T12:00:00').getFullYear() === anioActual);
-                    });
-
-                    if (haPagadoTodoEsteMes) {
-                        alCorrienteHtml = '<span title="Todos los pagos mensuales están al día.">✅</span>';
-                    } else {
-                        alCorrienteHtml = '<span title="Tiene pagos mensuales pendientes para este mes." style="color: #c0392b;">❌</span>';
-                    }
-                } else {
-                    // 3. Si no tiene productos de tipo mensual, se aplica la lógica de bonos.
-                    const tieneBonoConClases = misPagos.some(p => p.tipo === 'Bono' && (p.totalClases - (p.clasesUsadas || 0)) > 0);
-                    // 4. Si no tiene bonos, se comprueba si tiene un curso activo (pago único, no caducado).
-                    const tieneCursoActivo = misPagos.some(p => {
-                        if (p.tipo !== 'Curso' || !p.duracion) return false;
-                        const fechaCompra = new Date(p.fechaCompra + 'T12:00:00');
-                        const fechaCaducidad = new Date(fechaCompra);
-                        fechaCaducidad.setDate(fechaCompra.getDate() + p.duracion);
-                        return fechaCaducidad >= hoy;
-                    });
-
-                    if (tieneBonoConClases) {
-                        alCorrienteHtml = '<span title="Tiene un bono con clases disponibles.">✅</span>';
-                    } else if (tieneCursoActivo) { // Si no tiene bono pero sí un curso activo
-                        alCorrienteHtml = '<span title="Tiene un curso activo (no incluye clases).">🎓</span>';
-                    } else {
-                        alCorrienteHtml = '<span title="Sin producto activo (mensualidad, bono o curso). Necesita adquirir uno." style="color: #f39c12;">⚠️</span>';
-                    }
-                }
-                // Lógica para "Próxima Clase"
                 const ahora = new Date();
                 const proximaAsignacion = (asignaciones || [])
                     .filter(asig => {
                         const claseInfo = (todasLasClases || []).find(c => c.id == asig.claseId);
-                        if (!claseInfo) return false;
-                        return asig.alumno === nombreCompleto && new Date(`${asig.dia}T${claseInfo.hora}`) >= ahora;
+                        return asig.alumno === nombreCompleto && new Date(`${asig.dia}T${claseInfo?.hora || '00:00'}`) >= ahora;
                     })
                     .sort((x, y) => new Date(x.dia) - new Date(y.dia))[0];
-
-                const proximaClaseTexto = proximaAsignacion ? new Date(proximaAsignacion.dia + 'T12:00:00').toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' }) : '---';
-
+                const proximaClaseTexto = proximaAsignacion ? new Date(proximaAsignacion.dia + 'T12:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) : '---';
 
                 const fila = tabla.insertRow();
-                const badgeColor = (a.estado || 'Activo') === 'Activo' ? '#d5f4e6; color:#27ae60' : '#fadbd8; color:#c0392b';
                 fila.innerHTML = `
-                <td>${a.nombre}</td><td>${a.apellido}</td>
-                <td>${proximaClaseTexto}</td><td>${ultimoProducto}</td>
-                <td style="text-align:center; font-size: 1.2em;">${alCorrienteHtml}</td>
-                <td style="text-align:center;"><span style="padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold; background: ${badgeColor};">${a.estado || 'Activo'}</span></td>
-                <td class="actions-cell">
-                    <button class="actions-btn btn-view" onclick="verFicha(${a.id})">Ver ficha</button>
-                    <button class="actions-btn btn-products" onclick="abrirModalProductos(${a.id})">Productos</button>
-                    <button class="actions-btn btn-seguimiento" onclick="verSeguimiento(${a.id})">Seguimiento</button>
-                    <button class="actions-btn btn-history" onclick="verHistorial(${a.id})">Compras</button>
-                    <button class="actions-btn btn-edit" onclick="cargarAlumnoParaEditar(${a.id})">Editar</button>
-                    <button class="actions-btn btn-delete" onclick="eliminarAlumno(${a.id})">Eliminar</button>
-                </td>
-            `;
+                    <td>${a.nombre}</td><td>${a.apellido}</td>
+                    <td>${proximaClaseTexto}</td><td>${ultimoProducto}</td>
+                    <td style="text-align:center;">${alCorrienteHtml}</td>
+                    <td style="text-align:center;">${a.estado || 'Activo'}</td>
+                    <td class="actions-cell">
+                        <button class="actions-btn btn-view" onclick="verFicha('${a.id}')">Ficha</button>
+                        <button class="actions-btn btn-products" onclick="abrirModalProductos('${a.id}')">Productos</button>
+                        <button class="actions-btn btn-seguimiento" onclick="verSeguimiento('${a.id}')">Seguimiento</button>
+                        <button class="actions-btn btn-history" onclick="verHistorial('${a.id}')">Compras</button>
+                        <button class="actions-btn btn-edit" onclick="cargarAlumnoParaEditar('${a.id}')">Editar</button>
+                        <button class="actions-btn btn-delete" onclick="eliminarAlumno('${a.id}')">X</button>
+                    </td>
+                `;
             });
         }
 
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const id = alumnoIdInput.value;
+            const formaPago = document.querySelector('input[name="formaPago"]:checked').value;
+
+            // Save signature data
+            const signatureData = canvas.toDataURL();
+            const isCanvasEmpty = ctx.getImageData(0, 0, canvas.width, canvas.height).data.every(p => p === 0);
+
+            const alumnoData = {
+                id: id ? id : Date.now(),
+                dni: document.getElementById('dni').value.trim(),
+                fechaNacimiento: document.getElementById('fechaNacimiento').value,
+                nombre: document.getElementById('nombre').value.trim(),
+                apellido: document.getElementById('apellido').value.trim(),
+                direccion: document.getElementById('direccion').value.trim(),
+                cp: document.getElementById('cp').value.trim(),
+                poblacion: document.getElementById('poblacion').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                telefono: document.getElementById('telefono').value.trim(),
+                telefono2: document.getElementById('telefono2').value.trim(),
+                licencia: document.getElementById('licencia').value.trim(),
+                galopes: document.getElementById('galopes').value.trim(),
+                nivel: document.getElementById('nivel').value,
+                estado: document.getElementById('estado').value,
+                notaMedica: document.getElementById('notaMedica').value.trim(),
+                formaPago: formaPago,
+                aceptoRGPD: document.getElementById('aceptoRGPD').checked,
+                aceptoPublicidad: document.getElementById('aceptoPublicidad').checked,
+                aceptoImagen: document.getElementById('aceptoImagen').checked,
+                aceptoNormativa: document.getElementById('aceptoNormativa').checked,
+                fechaFirma: document.getElementById('fechaFirma').value,
+                signature: isCanvasEmpty ? '' : signatureData,
+                // Tutor
+                tutorDni: document.getElementById('tutorDni').value.trim(),
+                tutorNombre: document.getElementById('tutorNombre').value.trim(),
+                tutorApellido: document.getElementById('tutorApellido').value.trim(),
+                tutorDireccion: document.getElementById('tutorDireccion').value.trim(),
+                tutorCP: document.getElementById('tutorCP').value.trim(),
+                tutorPoblacion: document.getElementById('tutorPoblacion').value.trim(),
+                tutorEmail: document.getElementById('tutorEmail').value.trim(),
+                tutorTelefono: document.getElementById('tutorTelefono').value.trim(),
+                tutorTelefono2: document.getElementById('tutorTelefono2').value.trim(),
+                // Banco
+                titularCuenta: document.getElementById('titularCuenta').value.trim(),
+                iban: document.getElementById('iban').value.trim(),
+                entidad: document.getElementById('entidad').value.trim(),
+                sucursal: document.getElementById('sucursal').value.trim(),
+                dc: document.getElementById('dc').value.trim(),
+                cuenta: document.getElementById('cuenta').value.trim()
+            };
+
+            if (id) {
+                await dataManager.update('alumnosEscuela', id, alumnoData);
+                alert("¡Alumno actualizado!");
+            } else {
+                await dataManager.add('alumnosEscuela', alumnoData);
+                alert("¡Alumno registrado!");
+            }
+
+            restablecerFormulario();
+            mostrarAlumnos();
+        });
+
+        function restablecerFormulario() {
+            form.reset();
+            alumnoIdInput.value = '';
+            submitBtn.textContent = 'Registrar Alumno / Ikaslea Erregistratu';
+            toggleTutorSection();
+            domiciliacionSection.style.display = 'none';
+            document.getElementById('fechaFirma').valueAsDate = new Date();
+            clearSignature();
+        }
+
         async function cargarAlumnoParaEditar(id) {
-            const alumnos = await dataManager.get('alumnosEscuela') || [];
-            const a = alumnos.find(item => item.id === id);
+            const alumnos = await dataManager.get('alumnosEscuela');
+            const a = alumnos.find(item => item.id == id);
             if (a) {
                 alumnoIdInput.value = a.id;
-                document.getElementById('dni').value = a.dni;
-                document.getElementById('nombre').value = a.nombre;
-                document.getElementById('apellido').value = a.apellido;
-                document.getElementById('edad').value = a.edad;
-                document.getElementById('nivel').value = a.nivel;
-                document.getElementById('estado').value = a.estado || 'Activo';
-                document.getElementById('telefono').value = a.telefono;
+                document.getElementById('dni').value = a.dni || '';
+                document.getElementById('fechaNacimiento').value = a.fechaNacimiento || '';
+                document.getElementById('nombre').value = a.nombre || '';
+                document.getElementById('apellido').value = a.apellido || '';
+                document.getElementById('direccion').value = a.direccion || '';
+                document.getElementById('cp').value = a.cp || '';
+                document.getElementById('poblacion').value = a.poblacion || '';
                 document.getElementById('email').value = a.email || '';
+                document.getElementById('telefono').value = a.telefono || '';
+                document.getElementById('telefono2').value = a.telefono2 || '';
+                document.getElementById('licencia').value = a.licencia || '';
+                document.getElementById('galopes').value = a.galopes || '';
+                document.getElementById('nivel').value = a.nivel || '';
+                document.getElementById('estado').value = a.estado || 'Activo';
                 document.getElementById('notaMedica').value = a.notaMedica || '';
-                document.getElementById('notaAlimentaria').value = a.notaAlimentaria || '';
-                tutorNombreInput.value = a.tutorNombre || '';
-                actualizarCamposTutor();
+
+                document.getElementById('aceptoRGPD').checked = a.aceptoRGPD || false;
+                document.getElementById('aceptoPublicidad').checked = a.aceptoPublicidad || false;
+                document.getElementById('aceptoImagen').checked = a.aceptoImagen || false;
+                document.getElementById('aceptoNormativa').checked = a.aceptoNormativa || false;
+                document.getElementById('fechaFirma').value = a.fechaFirma || '';
+
+                if (a.signature) {
+                    var img = new Image();
+                    img.onload = function () { ctx.drawImage(img, 0, 0); };
+                    img.src = a.signature;
+                } else {
+                    clearSignature();
+                }
+
+                document.getElementById('tutorDni').value = a.tutorDni || '';
+                document.getElementById('tutorNombre').value = a.tutorNombre || '';
+                document.getElementById('tutorApellido').value = a.tutorApellido || '';
+                document.getElementById('tutorDireccion').value = a.tutorDireccion || '';
+                document.getElementById('tutorCP').value = a.tutorCP || '';
+                document.getElementById('tutorPoblacion').value = a.tutorPoblacion || '';
+                document.getElementById('tutorEmail').value = a.tutorEmail || '';
+                document.getElementById('tutorTelefono').value = a.tutorTelefono || '';
+                document.getElementById('tutorTelefono2').value = a.tutorTelefono2 || '';
+
+                if (a.formaPago) {
+                    const radio = document.querySelector(`input[name="formaPago"][value="${a.formaPago}"]`);
+                    if (radio) {
+                        radio.checked = true;
+                        radio.dispatchEvent(new Event('change'));
+                    }
+                }
+
+                document.getElementById('titularCuenta').value = a.titularCuenta || '';
+                document.getElementById('iban').value = a.iban || '';
+                document.getElementById('entidad').value = a.entidad || '';
+                document.getElementById('sucursal').value = a.sucursal || '';
+                document.getElementById('dc').value = a.dc || '';
+                document.getElementById('cuenta').value = a.cuenta || '';
+
+                toggleTutorSection();
                 submitBtn.textContent = 'Actualizar Alumno';
-                submitBtn.classList.add('btn-update');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                window.scrollTo({ top: form.offsetTop - 50, behavior: 'smooth' });
             }
         }
 
         async function eliminarAlumno(id) {
             if (confirm('¿Borrar alumno?')) {
-                let alumnos = await dataManager.get('alumnosEscuela') || [];
-                const alumnoAEliminar = alumnos.find(a => a.id === id);
-                const nombreCompleto = `${alumnoAEliminar.nombre} ${alumnoAEliminar.apellido}`;
-
-                alumnos = alumnos.filter(a => a.id !== id);
-                await dataManager.set('alumnosEscuela', alumnos);
-
-                // Eliminar referencias en asignaciones
-                let asignaciones = await dataManager.get('asignacionesEscuela') || [];
-                asignaciones = asignaciones.filter(a => a.alumno !== nombreCompleto);
-                await dataManager.set('asignacionesEscuela', asignaciones);
-
-                if (alumnoIdInput.value == id) restablecerFormulario();
+                await dataManager.delete('alumnosEscuela', id);
                 mostrarAlumnos();
             }
         }
 
-        function restablecerFormulario() {
-            form.reset();
-            alumnoIdInput.value = '';
-            submitBtn.textContent = 'Registrar Alumno';
-            submitBtn.classList.remove('btn-update');
-            actualizarCamposTutor();
-        }
-
         async function verFicha(id) {
-            const alumnos = await dataManager.get('alumnosEscuela') || [];
-            const a = alumnos.find(item => item.id === id);
+            const alumnos = await dataManager.get('alumnosEscuela');
+            const a = alumnos.find(item => item.id == id);
             if (a) {
-                const esMenor = parseInt(a.edad) < 18;
+                const edad = calcularEdad(a.fechaNacimiento);
                 document.getElementById('fichaDetalles').innerHTML = `
-                <p><strong>DNI:</strong> ${a.dni} ${esMenor ? '(Tutor)' : ''}</p>
-                <p><strong>Nombre:</strong> ${a.nombre}</p>
-                <p><strong>Apellidos:</strong> ${a.apellido}</p>
-                <p><strong>Edad:</strong> ${a.edad}</p>
-                ${esMenor ? `<p><strong>Tutor:</strong> ${a.tutorNombre || '-'}</p>` : ''}
-                <p><strong>Nivel:</strong> ${a.nivel}</p>
-                <p><strong>Estado:</strong> ${a.estado || 'Activo'}</p>
-                <p><strong>Teléfono:</strong> ${a.telefono} ${esMenor ? '(Tutor)' : ''}</p>
-                <p><strong>Email:</strong> ${a.email || '-'} ${esMenor ? '(Tutor)' : ''}</p>
-                <p><strong>Nota Médica:</strong> ${a.notaMedica || '-'}</p>
-                <p><strong>Nota Alimentaria:</strong> ${a.notaAlimentaria || '-'}</p>
-            `;
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px; text-align:left;">
+                        <p><strong>DNI:</strong> ${a.dni || '-'}</p>
+                        <p><strong>Fecha Nac.:</strong> ${a.fechaNacimiento || '-'}</p>
+                        <p><strong>Nombre:</strong> ${a.nombre || '-'}</p>
+                        <p><strong>Apellido:</strong> ${a.apellido || '-'}</p>
+                        <p><strong>Dirección:</strong> ${a.direccion || '-'}</p>
+                        <p><strong>Población:</strong> ${a.poblacion || '-'} (${a.cp || '-'})</p>
+                        <p><strong>Teléfono:</strong> ${a.telefono || '-'}</p>
+                        <p><strong>Teléfono 2:</strong> ${a.telefono2 || '-'}</p>
+                        <p><strong>Licencia:</strong> ${a.licencia || '-'}</p>
+                        <p><strong>Galopes:</strong> ${a.galopes || '-'}</p>
+                        <p><strong>Nivel:</strong> ${a.nivel || '-'}</p>
+                        <p><strong>Forma Pago:</strong> ${a.formaPago || '-'}</p>
+                    </div>
+                    ${edad < 18 ? `
+                    <div style="border-top:1px solid #eee; margin-top:10px; padding-top:10px; text-align:left;">
+                        <strong>Tutor:</strong> ${a.tutorNombre} ${a.tutorApellido} (${a.tutorDni})<br>
+                        <strong>Tel:</strong> ${a.tutorTelefono} / ${a.tutorTelefono2}<br>
+                        <strong>Email:</strong> ${a.tutorEmail}
+                    </div>` : ''}
+                    ${a.formaPago === 'Domiciliacion' ? `
+                    <div style="border-top:1px solid #eee; margin-top:10px; padding-top:10px; text-align:left;">
+                        <strong>Banco:</strong> ${a.titularCuenta}<br>
+                        <strong>IBAN:</strong> ${a.iban} ${a.entidad} ${a.sucursal} ${a.dc} ${a.cuenta}
+                    </div>` : ''}
+                    <div style="border-top:1px solid #eee; margin-top:10px; padding-top:10px; text-align:left; font-size: 0.9em;">
+                        <strong>Consentimientos:</strong><br>
+                        RGPD: ${a.aceptoRGPD ? '✅' : '❌'}<br>
+                        Publicidad: ${a.aceptoPublicidad ? '✅' : '❌'}<br>
+                        Imagen: ${a.aceptoImagen ? '✅' : '❌'}<br>
+                        Normativa/Riesgos: ${a.aceptoNormativa ? '✅' : '❌'} (${a.fechaFirma || '-'})
+                    </div>
+                    ${a.signature ? `
+                    <div style="margin-top:10px; text-align:center;">
+                        <strong>Firma:</strong><br>
+                        <img src="${a.signature}" style="border:1px solid #ddd; background:#fff; max-width:100%; height:auto;">
+                    </div>` : ''}
+                `;
                 document.getElementById('modalFicha').style.display = 'block';
             }
         }
 
-        function cerrarFicha() {
-            document.getElementById('modalFicha').style.display = 'none';
-        }
+        function cerrarFicha() { document.getElementById('modalFicha').style.display = 'none'; }
 
         async function verHistorial(id) {
-            const alumnos = await dataManager.get('alumnosEscuela') || [];
-            const a = alumnos.find(item => item.id === id);
-            if (!a) return;
-
-            // Función interna para normalizar nombres y evitar fallos por espacios triples o tabs
-            const limpiar = (t) => (t || '').trim().replace(/\s+/g, ' ');
-            const nombreCompleto = limpiar(`${a.nombre} ${a.apellido}`);
-
-            const asistencia = await dataManager.get('attendanceEscuela') || [];
             const pagos = await dataManager.get('pagosAlumnosEscuela') || [];
-            const misPagos = pagos.filter(p => p.alumnoId === id);
-
-            let html = `<p><strong>Alumno:</strong> ${nombreCompleto}</p>`;
-            html += `<hr style="border:0; border-top:1px solid #eee; margin:15px 0;">`;
-
-            html += `<h4 style="color:#27ae60; margin-top: 0; margin-bottom: 10px;">🛍️ Historial de Compras</h4>`;
-            if (misPagos.length === 0) {
-                html += `<p style="color:#888; font-style:italic; text-align:center;">Este alumno no tiene productos registrados.</p>`;
-            } else {
-                html += `<table style="font-size: 0.85em; width:100%; border-collapse: collapse;">
-                        <thead><tr style="background:#27ae60; color:white;">
-                            <th style="padding:8px; text-align:left;">Producto / Servicio</th>
-                            <th style="padding:8px; text-align:right;">Precio</th>
-                            <th style="padding:8px; text-align:center;">Fecha Compra</th>
-                        </tr></thead>
-                        <tbody>`; const misPagosOrdenadosReciente = [...misPagos].sort((x, y) => new Date(y.fechaCompra) - new Date(x.fechaCompra));
-                misPagos.forEach(pago => {
-                    html += `<tr>
-                    <td style="padding:8px; border-bottom:1px solid #eee;">${pago.productoNombre}</td>
-                    <td style="padding:8px; border-bottom:1px solid #eee; text-align:right;">${pago.productoPrecio} €</td>
-                    <td style="padding:8px; border-bottom:1px solid #eee; text-align:center;">${new Date(pago.fechaCompra + 'T12:00:00').toLocaleDateString('es-ES')}</td>
-                </tr>`;
-                });
-                html += `</tbody></table>`;
-            }
-
+            const misPagos = pagos.filter(p => p.alumnoId == id).sort((x, y) => new Date(y.fechaCompra) - new Date(x.fechaCompra));
+            let html = misPagos.length === 0 ? '<p>No hay compras registradas.</p>' :
+                `<table><thead><tr><th>Producto</th><th>Precio</th><th>Fecha</th></tr></thead><tbody>` +
+                misPagos.map(p => `<tr><td>${p.productoNombre}</td><td>${p.productoPrecio} €</td><td>${new Date(p.fechaCompra + 'T12:00:00').toLocaleDateString()}</td></tr>`).join('') +
+                `</tbody></table>`;
             document.getElementById('historialDetalles').innerHTML = html;
             document.getElementById('modalHistorial').style.display = 'block';
         }
 
+        function cerrarHistorial() { document.getElementById('modalHistorial').style.display = 'none'; }
+
         async function verSeguimiento(id) {
-            const alumnos = await dataManager.get('alumnosEscuela') || [];
-            const a = alumnos.find(item => item.id === id);
-            if (!a) return;
-
-            const nombreCompleto = `${a.nombre} ${a.apellido}`;
             const asistencia = await dataManager.get('attendanceEscuela') || [];
-            const pagos = await dataManager.get('pagosAlumnosEscuela') || [];
-            const asignaciones = await dataManager.get('asignacionesEscuela') || [];
-            const misPagos = pagos.filter(p => p.alumnoId == id);
-
-            let html = `<p><strong>Alumno:</strong> ${nombreCompleto}</p>`;
-
-            // --- RENDERIZADO FINAL ---
-            html += `<hr style="border:0; border-top:1px solid #eee; margin:15px 0;">`;
-            const hoy = new Date();
-            const mesActual = hoy.getMonth();
-            const anioActual = hoy.getFullYear();
-
-            // --- SECCIÓN BONOS ---
-            const bonosActivos = misPagos
-                .filter(p => {
-                    const fechaCompra = new Date(p.fechaCompra + 'T12:00:00');
-                    return p.tipo === 'Bono' && (p.totalClases - (p.clasesUsadas || 0)) > 0 &&
-                        fechaCompra.getMonth() === mesActual && fechaCompra.getFullYear() === anioActual;
-                })
-                .sort((a, b) => new Date(a.fechaCompra) - new Date(b.fechaCompra));
-            const bonosExpirados = misPagos
-                .filter(p => p.tipo === 'Bono' && (p.totalClases - (p.clasesUsadas || 0)) > 0 && !bonosActivos.includes(p));
-
-            let seccionBonos = '';
-            if (bonosActivos.length > 0) {
-                const bono = bonosActivos[0]; // Mostramos solo el más antiguo con clases
-                const totalClases = bono.totalClases || 0;
-                const clasesUsadas = bono.clasesUsadas || 0;
-                const clasesRestantes = totalClases - clasesUsadas;
-                const statusColor = clasesRestantes > 0 ? '#27ae60' : '#c0392b';
-                const progresoHtml = `<b>${clasesUsadas}</b> usadas / <b style="color:${statusColor};">${clasesRestantes}</b> restantes`;
-                seccionBonos += `<table style="font-size: 0.85em; width:100%; border-collapse: collapse;">
-                    <thead><tr style="background:#27ae60; color:white;"><th style="padding:8px; text-align:left;">Bono Activo</th><th style="padding:8px; text-align:center;">Progreso</th></tr></thead>
-                    <tbody><tr>
-                        <td style="padding:8px; border-bottom:1px solid #eee;"><b>${bono.productoNombre}</b><br><small>Comprado: ${new Date(bono.fechaCompra + 'T12:00:00').toLocaleDateString('es-ES')}</small></td>
-                        <td style="padding:8px; border-bottom:1px solid #eee; text-align:center; font-size:0.95em;">${progresoHtml}</td>
-                    </tr></tbody></table>`;
-            }
-            if (bonosExpirados.length > 0) {
-                seccionBonos += `<h5 style="color:#e67e22; margin-top: 15px; margin-bottom: 5px;">Bonos Expirados con Clases Restantes</h5>`;
-                seccionBonos += `<div style="font-size: 0.9em;">`;
-                bonosExpirados.forEach(bono => {
-                    const clasesRestantes = (bono.totalClases || 0) - (bono.clasesUsadas || 0);
-                    seccionBonos += `<div style="background:#fef5e7; padding:5px 8px; margin-bottom:4px; border-radius:3px; color:#b9770e;">
-                        <b>${bono.productoNombre}</b> - ${clasesRestantes} clase(s) restante(s) <small>(Comprado: ${new Date(bono.fechaCompra + 'T12:00:00').toLocaleDateString('es-ES')})</small>
-                    </div>`;
-                });
-                seccionBonos += `</div>`;
-            }
-
-            // Comprobar si hay algún bono (activo o agotado) en el mes actual
-            const bonoDelMes = misPagos.find(p => {
-                const fechaCompra = new Date(p.fechaCompra + 'T12:00:00');
-                return p.tipo === 'Bono' &&
-                    fechaCompra.getMonth() === mesActual &&
-                    fechaCompra.getFullYear() === anioActual;
-            });
-
-            // --- SECCIÓN CLASES FUTURAS (SI TIENE BONO) ---
-            // Si hay un bono este mes (activo o no), mostrar las clases futuras reservadas en la sección de Bonos.
-            if (bonoDelMes) {
-                const todasLasClases = await dataManager.get('clasesEscuela') || [];
-                const hoyStr = new Date().toISOString().split('T')[0];
-                const misAsignacionesFuturas = asignaciones
-                    .filter(asig => {
-                        if (asig.alumno !== nombreCompleto || asig.dia < hoyStr) return false;
-                        return !(asistencia.some(att => att.alumnoId === a.id && att.claseId == asig.claseId && att.fechaClase === asig.dia && att.asistio));
-                    })
-                    .map(asig => ({ ...asig, claseInfo: todasLasClases.find(c => c.id == asig.claseId) }))
-                    .sort((x, y) => new Date(x.dia) - new Date(y.dia));
-
-                if (misAsignacionesFuturas.length > 0) {
-                    seccionBonos += `<h5 style="color:#8e44ad; margin-top: 15px; margin-bottom: 5px;">Clases Futuras Reservadas</h5>`;
-                    misAsignacionesFuturas.forEach(asig => {
-                        const fechaFmt = new Date(asig.dia + 'T12:00:00').toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' });
-                        seccionBonos += `<div style="background:#f4ecf7; padding:5px 8px; margin-bottom:4px; border-radius:3px; color:#7d3c98; font-size:0.9em;"><b>${fechaFmt}</b> a las ${asig.claseInfo?.hora || '?'}</div>`;
-                    });
-
-                    // Comprobar si tiene más clases reservadas que disponibles en el bono (activo o agotado)
-                    const clasesRestantesEnBono = (bonoDelMes.totalClases || 0) - (bonoDelMes.clasesUsadas || 0);
-                    const clasesExcedentes = misAsignacionesFuturas.length - clasesRestantesEnBono;
-                    if (clasesExcedentes > 0) {
-                        const clasesRestantesTexto = Math.max(0, clasesRestantesEnBono);
-                        seccionBonos += `<div style="background:#fadbd8; color:#c0392b; padding:10px; border-radius:5px; text-align:center; margin-top:15px; font-weight:bold;">⚠️ ¡Atención! Tiene ${misAsignacionesFuturas.length} clases reservadas pero solo le quedan ${clasesRestantesTexto} en el bono.</div>`;
-                    }
-                }
-            }
-
-            if (seccionBonos === '') {
-                seccionBonos = `<p style="color:#888; font-style:italic; text-align:center;">No tiene bonos registrados.</p>`;
-            }
-            html += `<h4 style="color:#27ae60; margin-top: 20px; margin-bottom: 10px;">🎟️ Bonos</h4>`;
-            html += seccionBonos;
-
-            // --- SECCIÓN CLASES Y MENSUALIDADES ---
-            const pagosClases = misPagos.filter(p => p.tipo === 'Clase Suelta' || p.tipo === 'Bono');
-            let seccionClases = '';
-            if (pagosClases.length > 0) {
-                seccionClases += `<table style="font-size: 0.85em; width:100%; border-collapse: collapse;">
-                    <thead><tr style="background:#3498db; color:white;"><th style="padding:8px;">Producto</th><th style="padding:8px; text-align:center;">Fecha Compra</th></tr></thead><tbody>`;
-                pagosClases.forEach(pago => {
-                    seccionClases += `<tr>
-                        <td style="padding:8px; border-bottom:1px solid #eee;">${pago.productoNombre}</td>
-                        <td style="padding:8px; border-bottom:1px solid #eee; text-align:center;">${new Date(pago.fechaCompra + 'T12:00:00').toLocaleDateString('es-ES')}</td>
-                    </tr>`;
-                });
-                seccionClases += `</tbody></table>`;
-            }
-
-            // --- SECCIÓN CLASES FUTURAS (SI TIENE CLASE SUELTA Y NO BONO) ---
-            const claseSueltaDelMes = misPagos.find(p => {
-                const fechaCompra = new Date(p.fechaCompra + 'T12:00:00');
-                return p.tipo === 'Clase Suelta' && fechaCompra.getMonth() === mesActual && fechaCompra.getFullYear() === anioActual;
-            });
-
-            // Mostrar solo si tiene clase suelta Y NO tiene un bono del mes (para no duplicar)
-            if (claseSueltaDelMes && !bonoDelMes) {
-                const todasLasClases = await dataManager.get('clasesEscuela') || [];
-                const hoyStr = new Date().toISOString().split('T')[0];
-                const misAsignacionesFuturas = asignaciones
-                    .filter(asig => asig.alumno === nombreCompleto && asig.dia >= hoyStr && !asistencia.some(att => att.alumnoId === a.id && att.claseId == asig.claseId && att.fechaClase === asig.dia && att.asistio))
-                    .map(asig => ({ ...asig, claseInfo: todasLasClases.find(c => c.id == asig.claseId) }))
-                    .sort((x, y) => new Date(x.dia) - new Date(y.dia));
-
-                if (misAsignacionesFuturas.length > 0) {
-                    seccionClases += `<h5 style="color:#8e44ad; margin-top: 15px; margin-bottom: 5px;">Clases Futuras Reservadas</h5>`;
-                    misAsignacionesFuturas.forEach(asig => { const fechaFmt = new Date(asig.dia + 'T12:00:00').toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' }); seccionClases += `<div style="background:#f4ecf7; padding:5px 8px; margin-bottom:4px; border-radius:3px; color:#7d3c98; font-size:0.9em;"><b>${fechaFmt}</b> a las ${asig.claseInfo?.hora || '?'}</div>`; });
-                }
-            }
-
-            // --- ADVERTENCIA PARA PLANES SEMANALES ---
-            const pagoSemanal = misPagos.find(p =>
-                p.productoNombre.toLowerCase().includes('semana') &&
-                new Date(p.fechaCompra + 'T12:00:00').getMonth() === mesActual &&
-                new Date(p.fechaCompra + 'T12:00:00').getFullYear() === anioActual
-            );
-
-            if (pagoSemanal) {
-                const hoy = new Date();
-                const diaSemana = hoy.getDay(); // Domingo = 0, Lunes = 1, etc.
-                const primerDiaSemana = new Date(hoy);
-                primerDiaSemana.setDate(hoy.getDate() - (diaSemana === 0 ? 6 : diaSemana - 1)); // Ajustar para que la semana empiece en Lunes
-                primerDiaSemana.setHours(0, 0, 0, 0);
-
-                const ultimoDiaSemana = new Date(primerDiaSemana);
-                ultimoDiaSemana.setDate(primerDiaSemana.getDate() + 6);
-                ultimoDiaSemana.setHours(23, 59, 59, 999);
-
-                const clasesAsistidasEstaSemana = asistencia.filter(att => {
-                    const fechaClase = new Date(att.fechaClase + 'T12:00:00');
-                    return att.alumnoId === a.id && att.asistio && fechaClase >= primerDiaSemana && fechaClase <= ultimoDiaSemana;
-                }).length;
-
-                const clasesReservadasEstaSemana = asignaciones.filter(asig => {
-                    const fechaAsig = new Date(asig.dia + 'T12:00:00');
-                    const yaAsistio = asistencia.some(att => att.alumnoId === a.id && att.claseId == asig.claseId && att.fechaClase === asig.dia && att.asistio);
-                    return asig.alumno === nombreCompleto &&
-                        fechaAsig >= primerDiaSemana && fechaAsig <= ultimoDiaSemana &&
-                        !yaAsistio; // Excluir si ya ha asistido
-                }).length;
-
-                const clasesSemanalesContratadas = pagoSemanal.totalClases || 0;
-                if (clasesReservadasEstaSemana > clasesSemanalesContratadas) {
-                    seccionClases += `<div style="background:#fadbd8; color:#c0392b; padding:10px; border-radius:5px; text-align:center; margin-top:15px; font-weight:bold;">⚠️ ¡Atención! Tiene ${clasesReservadasEstaSemana} clases reservadas esta semana, pero su plan solo incluye ${clasesSemanalesContratadas}.</div>`;
-                }
-            }
-
-            // Lógica de deuda
-            const totalClasesAsistidas = asistencia.filter(att => att.alumnoId == id && att.asistio).length;
-            const totalClasesPagadas = misPagos.reduce((sum, p) => sum + (p.clasesUsadas || 0), 0);
-            const clasesPendientes = totalClasesAsistidas - totalClasesPagadas;
-
-            if (clasesPendientes > 0) {
-                const clasesSueltas = await dataManager.get('clasesSueltasEscuela') || [];
-                const claseSuelta = clasesSueltas.find(p => p.nombre.toLowerCase().includes('clase suelta'));
-                const precioClaseSuelta = claseSuelta ? parseFloat(claseSuelta.precio) : 20; // Precio por defecto
-                const deuda = clasesPendientes * precioClaseSuelta;
-
-                seccionClases += `<div style="background:#fadbd8; color:#c0392b; padding:15px; border-radius:5px; text-align:center; margin-top:15px;">
-                    <div style="font-weight:bold; font-size:1.1em;">⚠️ DEUDA DETECTADA</div>
-                    <p style="margin:10px 0;">Ha consumido <b>${clasesPendientes} clase(s) suelta(s)</b> sin pagar.</p>
-                    <p style="font-size:1.2em; font-weight:bold; margin:5px 0;">Deuda estimada: <b>${deuda.toFixed(2)} €</b></p>
-                    <button onclick="abonarDeuda(${id}, ${clasesPendientes}, ${claseSuelta ? claseSuelta.id : null}, '${claseSuelta ? claseSuelta.nombre : 'Clase Suelta'}', ${precioClaseSuelta})" style="margin-top:15px; background-color:#27ae60; padding: 8px 15px; width:auto; font-size:14px;">Abonar ${clasesPendientes} Clase(s)</button>
-                </div>`;
-            }
-
-            if (seccionClases === '') {
-                seccionClases = `<p style="color:#888; font-style:italic; text-align:center;">No tiene clases sueltas o mensualidades registradas.</p>`;
-            }
-            html += `<h4 style="color:#3498db; margin-top: 20px; margin-bottom: 10px;">📅 Clases y Mensualidades</h4>`;
-            html += seccionClases;
-
-            // --- SECCIÓN OTROS SERVICIOS ---
-            // 1. Obtener una lista de todos los "Otros Servicios" únicos que el alumno ha contratado alguna vez.
-            const serviciosUnicosContratados = [...new Set(misPagos.filter(p => p.tipo === 'Otro').map(p => p.productoNombre))];
-
-            let seccionOtros = '';
-            if (serviciosUnicosContratados.length > 0) {
-                seccionOtros += `<table style="font-size: 0.85em; width:100%; border-collapse: collapse;">
-                    <thead><tr style="background:#f39c12; color:white;">
-                        <th style="padding:8px;">Servicio Mensual</th>
-                        <th style="padding:8px; text-align:center;">Estado este mes</th>
-                    </tr></thead><tbody>`;
-
-                serviciosUnicosContratados.forEach(nombreServicio => {
-                    // 2. Para cada servicio, comprobar si se ha pagado en el mes actual.
-                    const haPagadoEsteMes = misPagos.some(p =>
-                        p.productoNombre === nombreServicio &&
-                        new Date(p.fechaCompra + 'T12:00:00').getMonth() === mesActual &&
-                        new Date(p.fechaCompra + 'T12:00:00').getFullYear() === anioActual
-                    );
-
-                    const estadoHtml = haPagadoEsteMes
-                        ? '<span title="Pagado este mes." style="color: #27ae60; font-weight: bold;">✅ Al día</span>'
-                        : '<span title="Pago de este mes pendiente." style="color: #c0392b; font-weight: bold;">❌ Pendiente</span>';
-
-                    seccionOtros += `<tr>
-                        <td style="padding:8px; border-bottom:1px solid #eee;"><b>${nombreServicio}</b></td>
-                        <td style="padding:8px; border-bottom:1px solid #eee; text-align:center;">${estadoHtml}</td>
-                    </tr>`;
-                });
-                seccionOtros += `</tbody></table>`;
-            } else {
-                seccionOtros = `<p style="color:#888; font-style:italic; text-align:center;">No ha contratado otros servicios.</p>`;
-            }
-
-            html += `<h4 style="color:#f39c12; margin-top: 20px; margin-bottom: 10px;">🛎️ Otros Servicios</h4>`;
-            html += seccionOtros;
-
-            // --- SECCIÓN CURSOS ---
-            const cursosComprados = misPagos.filter(p => p.tipo === 'Curso');
-            let seccionCursos = '';
-            if (cursosComprados.length > 0) {
-                seccionCursos += `<table style="font-size: 0.85em; width:100%; border-collapse: collapse;">
-                    <thead><tr style="background:#9b59b6; color:white;">
-                        <th style="padding:8px;">Curso</th>
-                        <th style="padding:8px; text-align:center;">Fecha Compra</th>
-                        <th style="padding:8px; text-align:center;">Fecha Caducidad</th>
-                    </tr></thead><tbody>`;
-
-                cursosComprados.forEach(pago => {
-                    const fechaCompra = new Date(pago.fechaCompra + 'T12:00:00');
-                    const duracion = pago.duracion;
-                    let caducidadHtml = '---';
-                    let estadoCursoStyle = '';
-
-                    if (duracion && duracion > 0) {
-                        const fechaCaducidad = new Date(fechaCompra);
-                        fechaCaducidad.setDate(fechaCompra.getDate() + duracion);
-                        const hoy = new Date();
-                        hoy.setHours(0, 0, 0, 0);
-
-                        caducidadHtml = fechaCaducidad.toLocaleDateString('es-ES');
-                        if (fechaCaducidad < hoy) {
-                            estadoCursoStyle = `style="color: #c0392b; text-decoration: line-through;" title="Curso expirado"`;
-                        }
-                    }
-
-                    seccionCursos += `<tr ${estadoCursoStyle}>
-                        <td style="padding:8px; border-bottom:1px solid #eee;"><b>${pago.productoNombre}</b></td>
-                        <td style="padding:8px; border-bottom:1px solid #eee; text-align:center;">${fechaCompra.toLocaleDateString('es-ES')}</td>
-                        <td style="padding:8px; border-bottom:1px solid #eee; text-align:center;">${caducidadHtml}</td>
-                    </tr>`;
-                });
-                seccionCursos += `</tbody></table>`;
-            } else {
-                seccionCursos = `<p style="color:#888; font-style:italic; text-align:center;">No ha comprado ningún curso.</p>`;
-            }
-            html += `<h4 style="color:#9b59b6; margin-top: 20px; margin-bottom: 10px;">📚 Cursos Comprados</h4>`;
-            html += seccionCursos;
-
+            const misAsistencias = asistencia.filter(att => att.alumnoId == id).sort((x, y) => new Date(y.fechaClase) - new Date(x.fechaClase));
+            let html = misAsistencias.length === 0 ? '<p>No hay registro de asistencia.</p>' :
+                `<table><thead><tr><th>Fecha</th><th>Clase</th><th>Caballo</th><th>Asistió</th></tr></thead><tbody>` +
+                misAsistencias.map(att => `<tr><td>${new Date(att.fechaClase + 'T12:00:00').toLocaleDateString()}</td><td>${att.claseId}</td><td>${att.caballo || '-'}</td><td>${att.asistio ? '✅' : '❌'}</td></tr>`).join('') +
+                `</tbody></table>`;
             document.getElementById('seguimientoDetalles').innerHTML = html;
             document.getElementById('modalSeguimiento').style.display = 'block';
         }
 
-        async function abonarDeuda(alumnoId, cantidad, productoId, productoNombre, precioUnitario) {
-            if (!confirm(`¿Confirmas el pago de ${cantidad} clase(s) suelta(s) por un total de ${(cantidad * precioUnitario).toFixed(2)} €?`)) {
-                return;
-            }
-
-            let pagos = await dataManager.get('pagosAlumnosEscuela') || [];
-            const fechaHoy = new Date().toISOString().split('T')[0];
-
-            for (let i = 0; i < cantidad; i++) {
-                const nuevoPago = {
-                    id: Date.now() + i,
-                    alumnoId,
-                    productoId: productoId, // Guardamos el ID del producto "Clase Suelta"
-                    productoNombre: productoNombre,
-                    productoPrecio: precioUnitario.toFixed(2),
-                    fechaCompra: fechaHoy,
-                    tipo: 'Clase Suelta',
-                    totalClases: 1,
-                    clasesUsadas: 0 // Se crea para saldar una deuda, no para ser consumida de nuevo.
-                };
-                pagos.push(nuevoPago);
-            }
-
-            try {
-                await dataManager.set('pagosAlumnosEscuela', pagos);
-                alert(`¡Pago de ${cantidad} clase(s) extra registrado correctamente! La información se actualizará.`);
-                // Forzamos la recarga del modal y la tabla para que reflejen el pago
-                verSeguimiento(alumnoId); // Recarga el modal de seguimiento
-                mostrarAlumnos(); // Recarga la tabla principal de alumnos
-            } catch (error) {
-                console.error("Error al abonar la deuda:", error);
-                alert("Hubo un error al procesar el pago.");
-            }
-        }
-
-        function cerrarHistorial() {
-            document.getElementById('modalHistorial').style.display = 'none';
-        }
+        function cerrarSeguimiento() { document.getElementById('modalSeguimiento').style.display = 'none'; }
 
         async function abrirModalProductos(alumnoId) {
             const alumnos = await dataManager.get('alumnosEscuela') || [];
-            const alumno = alumnos.find(a => a.id === alumnoId);
-            if (!alumno) return;
-
+            const alumno = alumnos.find(a => a.id == alumnoId);
             document.getElementById('nombreAlumnoProductos').textContent = `${alumno.nombre} ${alumno.apellido}`;
             document.getElementById('productoAlumnoId').value = alumnoId;
-
-            // Limpiar y preparar el modal
-            const tablaProductosDiv = document.getElementById('tablaProductosDisponibles');
-            const categoriaSelect = document.getElementById('categoriaProductoSelect');
-            categoriaSelect.value = '';
-            tablaProductosDiv.style.display = 'none';
-            tablaProductosDiv.innerHTML = '';
-
-            // Listener para el cambio de categoría
-            categoriaSelect.onchange = async () => {
-                const categoria = categoriaSelect.value;
-                if (!categoria) {
-                    tablaProductosDiv.style.display = 'none';
-                    return;
-                }
-
-                tablaProductosDiv.innerHTML = 'Cargando...';
-                tablaProductosDiv.style.display = 'block';
-
-                let productos = [];
-                let tipoProducto = '';
-                let colorHeader = '#ddd';
-
-                if (categoria === 'bonos') {
-                    productos = await dataManager.get('bonosEscuela') || [];
-                    tipoProducto = 'Bono';
-                    colorHeader = '#d5f4e6';
-                } else if (categoria === 'clases') {
-                    productos = await dataManager.get('clasesSueltasEscuela') || [];
-                    tipoProducto = 'Clase Suelta';
-                    colorHeader = '#eaf2f8';
-                } else if (categoria === 'cursos') {
-                    productos = await dataManager.get('cursosEscuela') || [];
-                    tipoProducto = 'Curso';
-                    colorHeader = '#f4ecf7';
-                } else if (categoria === 'otros') {
-                    productos = await dataManager.get('otrosServiciosEscuela') || [];
-                    tipoProducto = 'Otro';
-                    colorHeader = '#fef5e7';
-                }
-
-                if (productos.length === 0) {
-                    tablaProductosDiv.innerHTML = `<p style="text-align:center; color:#888; padding: 20px;">No hay productos en esta categoría.</p>`;
-                    return;
-                }
-
-                let tablaHtml = `<table style="width:100%;"><thead><tr style="background-color:${colorHeader};"><th>Producto</th><th style="text-align:right;">Precio</th><th style="text-align:center;">Acción</th></tr></thead><tbody>`;
-                productos.sort((a, b) => a.nombre.localeCompare(b.nombre)).forEach(p => {
-                    const datos = `data-id="${p.id}" data-nombre="${p.nombre}" data-precio="${p.precio}" data-tipo="${tipoProducto}" data-numclases="${p.numClases || '0'}" data-duracion="${p.duracion || '0'}"`;
-                    tablaHtml += `<tr><td>${p.nombre}</td><td style="text-align:right;">${p.precio} €</td><td style="text-align:center;"><button class="actions-btn btn-products" style="font-size:11px;" onclick="addProductoToAlumno(this)" ${datos}>Añadir</button></td></tr>`;
-                });
-                tablaHtml += `</tbody></table>`;
-                tablaProductosDiv.innerHTML = tablaHtml;
-            };
-
+            document.getElementById('categoriaProductoSelect').value = '';
+            document.getElementById('tablaProductosDisponibles').style.display = 'none';
             await mostrarProductosDeAlumno(alumnoId);
             document.getElementById('modalProductos').style.display = 'block';
         }
 
-        async function addProductoToAlumno(button) {
+        document.getElementById('categoriaProductoSelect').onchange = async (e) => {
+            const cat = e.target.value;
+            if (!cat) return;
+            const tablaProd = document.getElementById('tablaProductosDisponibles');
+            tablaProd.style.display = 'block';
+            let prods = [];
+            let tipo = '';
+            if (cat === 'bonos') { prods = await dataManager.get('bonosEscuela'); tipo = 'Bono'; }
+            else if (cat === 'clases') { prods = await dataManager.get('clasesSueltasEscuela'); tipo = 'Clase Suelta'; }
+            else if (cat === 'cursos') { prods = await dataManager.get('cursosEscuela'); tipo = 'Curso'; }
+            else if (cat === 'otros') { prods = await dataManager.get('otrosServiciosEscuela'); tipo = 'Otro'; }
+
+            tablaProd.innerHTML = `<table><thead><tr><th>Nombre</th><th>Precio</th><th></th></tr></thead><tbody>` +
+                prods.map(p => `<tr><td>${p.nombre}</td><td>${p.precio}€</td><td><button onclick="addProductoToAlumno(this)" data-id="${p.id}" data-nombre="${p.nombre}" data-precio="${p.precio}" data-tipo="${tipo}" data-clases="${p.numClases || 0}" data-duracion="${p.duracion || 0}">Añadir</button></td></tr>`).join('') +
+                `</tbody></table>`;
+        };
+
+        async function addProductoToAlumno(btn) {
             const alumnoId = parseInt(document.getElementById('productoAlumnoId').value);
-            const productoId = parseInt(button.dataset.id);
-            const productoNombre = button.dataset.nombre;
-            const productoTipo = button.dataset.tipo;
-            const productoNumClases = button.dataset.numclases;
-            const productoPrecio = button.dataset.precio;
-            const fechaCompra = new Date().toISOString().split('T')[0];
-
-            if (!confirm(`¿Añadir "${productoNombre}" por ${productoPrecio}€ al alumno?`)) return;
-
+            const d = btn.dataset;
             const nuevoPago = {
-                id: Date.now(), alumnoId, productoId, productoNombre, productoPrecio, fechaCompra,
-                tipo: productoTipo,
-                totalClases: (productoTipo === 'Bono' || productoTipo === 'Clase Suelta') ? parseInt(productoNumClases) : null,
-                clasesUsadas: 0,
-                duracion: productoTipo === 'Curso' ? parseInt(button.dataset.duracion) : null
+                id: Date.now(), alumnoId, productoId: parseInt(d.id), productoNombre: d.nombre, productoPrecio: d.precio,
+                fechaCompra: new Date().toISOString().split('T')[0], tipo: d.tipo,
+                totalClases: parseInt(d.clases), clasesUsadas: 0, duracion: parseInt(d.duracion)
             };
-
             let pagos = await dataManager.get('pagosAlumnosEscuela') || [];
             pagos.push(nuevoPago);
             await dataManager.set('pagosAlumnosEscuela', pagos);
-
             await mostrarProductosDeAlumno(alumnoId);
+            mostrarAlumnos();
         }
 
         async function mostrarProductosDeAlumno(alumnoId) {
-            const asistencia = await dataManager.get('attendanceEscuela') || [];
             const pagos = await dataManager.get('pagosAlumnosEscuela') || [];
-            const misPagos = pagos.filter(p => p.alumnoId === alumnoId).sort((x, y) => new Date(y.fechaCompra) - new Date(x.fechaCompra));
-            const tablaDiv = document.getElementById('productosAlumnoDetalles');
-
-            if (misPagos.length === 0) {
-                tablaDiv.innerHTML = `<p style="text-align:center; color:#888; font-style:italic;">Este alumno no ha adquirido productos.</p>`;
-                return;
-            }
-
-            let tablaHtml = `<table style="width:100%;"><thead><tr><th>Producto</th><th style="text-align:right;">Precio</th><th style="text-align:center;">Fecha</th><th style="text-align:center;">Acción</th></tr></thead><tbody>`;
-
-            misPagos.forEach(p => {
-                tablaHtml += `<tr>
-                    <td>${p.productoNombre}</td>
-                    <td style="text-align:right;">${p.productoPrecio} €</td>
-                    <td style="text-align:center;">${new Date(p.fechaCompra + 'T12:00:00').toLocaleDateString('es-ES')}</td>
-                    <td style="text-align:center;">
-                        <button class="actions-btn btn-delete" style="font-size:11px;" onclick="eliminarPago(${p.id}, ${alumnoId})">X</button>
-                    </td>
-                </tr>`;
-            });
-            tablaHtml += `</tbody></table>`;
-            tablaDiv.innerHTML = tablaHtml;
+            const misPagos = pagos.filter(p => p.alumnoId == alumnoId).sort((x, y) => new Date(y.fechaCompra) - new Date(x.fechaCompra));
+            document.getElementById('productosAlumnoDetalles').innerHTML = misPagos.length === 0 ? '<p>Sin productos.</p>' :
+                `<table><thead><tr><th>Producto</th><th>Fecha</th><th></th></tr></thead><tbody>` +
+                misPagos.map(p => `<tr><td>${p.productoNombre}</td><td>${new Date(p.fechaCompra + 'T12:00:00').toLocaleDateString()}</td><td><button class="btn-delete" onclick="eliminarPago(${p.id}, ${alumnoId})">X</button></td></tr>`).join('') +
+                `</tbody></table>`;
         }
 
-        async function eliminarPago(pagoId, alumnoId) {
-            if (confirm('¿Eliminar este registro de compra?')) {
+        async function eliminarPago(id, alumnoId) {
+            if (confirm('¿Eliminar compra?')) {
                 let pagos = await dataManager.get('pagosAlumnosEscuela') || [];
-                pagos = pagos.filter(p => p.id !== pagoId);
-                await dataManager.set('pagosAlumnosEscuela', pagos);
+                await dataManager.set('pagosAlumnosEscuela', pagos.filter(p => p.id != id));
                 await mostrarProductosDeAlumno(alumnoId);
+                mostrarAlumnos();
             }
         }
 
-        function cerrarSeguimiento() {
-            document.getElementById('modalSeguimiento').style.display = 'none';
-        }
+        function cerrarModalProductos() { document.getElementById('modalProductos').style.display = 'none'; }
 
-        function cerrarModalProductos() {
-            document.getElementById('modalProductos').style.display = 'none';
-        }
+        window.onload = async function () {
+            await dataManager.initPromise;
+            await poblarNiveles();
+            await mostrarAlumnos();
+            document.getElementById('fechaFirma').valueAsDate = new Date();
+            dataManager.onSnapshot('alumnosEscuela', mostrarAlumnos);
+            dataManager.onSnapshot('pagosAlumnosEscuela', mostrarAlumnos);
+            dataManager.onSnapshot('attendanceEscuela', mostrarAlumnos);
+        };
     </script>
-
-    <!-- Scripts de Firebase -->
-    <script src="data-manager.js?v=1.5"></script>
-
-
 </body>
 
 </html>
