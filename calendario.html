@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calendario - Escuela Ecuestre</title>
+    <title>Calendario - Zelai Alai</title>
 
     <!-- FullCalendar CSS -->
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css' rel='stylesheet' />
@@ -71,7 +71,13 @@
 
         #calendar {
             margin-top: 20px;
-            min-height: 600px;
+            min-height: 800px;
+        }
+
+        /* Aumentar la altura de las filas para que quepan más clases y se vea el texto */
+        .fc-timegrid-slot {
+            height: 60px !important;
+            /* Ajusta este valor según necesites más o menos espacio */
         }
 
         /* Asegura que los saltos de línea funcionen en todas las vistas (Mes, Semana y Día) */
@@ -136,9 +142,8 @@
                     day: 'Día'
                 },
                 firstDay: 1,
-                slotMinTime: '08:00:00',
-                slotMaxTime: '22:00:00',
                 allDaySlot: true, // Muestra la fila de "todo el día"
+                contentHeight: 'auto',
                 views: {
                     timeGridWeek: { allDaySlot: true }, // Asegura que se muestre en la vista de semana
                     timeGridDay: { allDaySlot: true },  // Asegura que se muestre en la vista de día
@@ -160,26 +165,68 @@
                 }
             });
 
+            // Ajustar horarios inicialmente
+            const eventosIniciales = await generarEventos();
+            ajustarHorariosCalendario(calendar, eventosIniciales);
+            calendar.setOption('events', eventosIniciales);
+
             calendar.render();
 
             if (dataManager.useFirebase) {
-                dataManager.onSnapshot('clasesEscuela', async () => {
-                    calendar.setOption('events', await generarEventos());
-                });
-                dataManager.onSnapshot('asignacionesEscuela', async () => {
-                    calendar.setOption('events', await generarEventos());
-                });
-                // Listener para campamento que faltaba
-                dataManager.onSnapshot('inscripcionesCampamento', async () => {
-                    calendar.setOption('events', await generarEventos());
-                });
-                dataManager.onSnapshot('agendaCaballosEscuela', async () => {
-                    calendar.setOption('events', await generarEventos());
-                });
-                // Asistencia también es necesaria para la agenda de caballos
-                dataManager.onSnapshot('attendanceEscuela', async () => { calendar.setOption('events', await generarEventos()); });
+                const refrescarCalendario = async () => {
+                    const eventos = await generarEventos();
+                    ajustarHorariosCalendario(calendar, eventos);
+                    calendar.setOption('events', eventos);
+                };
+
+                dataManager.onSnapshot('clasesEscuela', refrescarCalendario);
+                dataManager.onSnapshot('asignacionesEscuela', refrescarCalendario);
+                dataManager.onSnapshot('inscripcionesCampamento', refrescarCalendario);
+                dataManager.onSnapshot('agendaCaballosEscuela', refrescarCalendario);
+                dataManager.onSnapshot('attendanceEscuela', refrescarCalendario);
             }
         });
+
+        function ajustarHorariosCalendario(calendar, eventos) {
+            let earliest = 24 * 60;
+            let latest = 0;
+            let foundTimed = false;
+
+            eventos.forEach(e => {
+                if (e.allDay) return;
+
+                let startStr = e.startTime || (e.start && e.start.includes('T') ? e.start.split('T')[1] : null);
+                let endStr = e.endTime || (e.end && e.end.includes('T') ? e.end.split('T')[1] : null);
+
+                if (startStr) {
+                    const parts = startStr.split(':');
+                    const h = parseInt(parts[0]);
+                    const m = parseInt(parts[1]) || 0;
+                    earliest = Math.min(earliest, h * 60 + m);
+                    foundTimed = true;
+                }
+                if (endStr) {
+                    const parts = endStr.split(':');
+                    const h = parseInt(parts[0]);
+                    const m = parseInt(parts[1]) || 0;
+                    latest = Math.max(latest, h * 60 + m);
+                    foundTimed = true;
+                }
+            });
+
+            if (foundTimed) {
+                // Añadir 1 hora de margen antes y después
+                let minMin = Math.max(0, Math.floor(earliest / 60) - 1);
+                let maxMax = Math.min(24, Math.ceil(latest / 60) + 1);
+
+                const pad = (n) => String(n).padStart(2, '0');
+                calendar.setOption('slotMinTime', `${pad(minMin)}:00:00`);
+                calendar.setOption('slotMaxTime', `${pad(maxMax)}:00:00`);
+            } else {
+                calendar.setOption('slotMinTime', '08:00:00');
+                calendar.setOption('slotMaxTime', '21:00:00');
+            }
+        }
 
         function calcularHoraFin(horaStr, duracionEnMinutos) {
             if (!horaStr) return '12:00';

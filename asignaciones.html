@@ -187,16 +187,16 @@
         <h2>🔗 Apuntar Alumno a una Clase</h2>
         <form id="asignacionForm">
             <div class="form-group">
+                <label for="alumnoSelect">Seleccionar Alumno:</label>
+                <select id="alumnoSelect" required></select>
+            </div>
+            <div class="form-group">
                 <label for="claseSelect">Seleccionar Clase / Horario:</label>
                 <select id="claseSelect" required></select>
             </div>
             <div class="form-group" id="fechaSelectContainer" style="display: none;">
                 <label for="diaSelect">Seleccionar Fecha de la Clase:</label>
                 <select id="diaSelect" required></select>
-            </div>
-            <div class="form-group">
-                <label for="alumnoSelect">Seleccionar Alumno:</label>
-                <select id="alumnoSelect" required></select>
             </div>
             <button type="submit" id="submitBtn">Añadir Alumno a la Clase</button>
         </form>
@@ -222,10 +222,12 @@
 
         window.onload = async function () {
             await dataManager.initPromise;
+            alumnoSelect.addEventListener('change', actualizarSelectorClases);
             claseSelect.addEventListener('change', actualizarSelectorFecha);
             console.log('DataManager inicializado:', dataManager.useFirebase ? 'Firebase' : 'localStorage');
 
-            await poblarDesplegables();
+            await poblarAlumnos();
+            await poblarClases();
             await mostrarAsignacionesGrupales();
 
             if (dataManager.useFirebase) {
@@ -241,7 +243,7 @@
                     const dataActual = JSON.stringify(data || []);
                     if (dataActual !== ultimaDataAlumnos) {
                         ultimaDataAlumnos = dataActual;
-                        await poblarDesplegables();
+                        await poblarAlumnos();
                     }
                 });
 
@@ -249,7 +251,7 @@
                     const dataActual = JSON.stringify(data || []);
                     if (dataActual !== ultimaDataClases) {
                         ultimaDataClases = dataActual;
-                        await poblarDesplegables();
+                        await poblarClases();
                         await mostrarAsignacionesGrupales();
                     }
                 });
@@ -274,25 +276,43 @@
         });
 
 
-        async function poblarDesplegables() {
+        async function poblarAlumnos() {
+            const alumnos = await dataManager.get('alumnosEscuela') || [];
+            const alumnosActivos = alumnos.filter(a => (a.estado || 'Activo') === 'Activo');
+
+            alumnoSelect.innerHTML = alumnos.length === 0
+                ? '<option value="">⚠️ Registra alumnos primero</option>'
+                : alumnosActivos.length === 0
+                    ? '<option value="">⚠️ No hay alumnos marcados como Activos</option>'
+                    : '<option value="">-- Selecciona el alumno --</option>' + alumnosActivos.map(a => `<option value="${a.nombre} ${a.apellido}">${a.nombre} ${a.apellido}</option>`).join('');
+        }
+
+        async function poblarClases(nivelFiltrar = null) {
             const [clases, duraciones] = await Promise.all([
                 dataManager.get('clasesEscuela'),
                 dataManager.get('duracionesEscuela')
             ]);
             const duracionMap = new Map((duraciones || []).map(d => [String(d.valor), d.nombre]));
 
+            let clasesFiltradas = clases;
+            if (nivelFiltrar) {
+                clasesFiltradas = clases.filter(c => !c.nivel || c.nivel === nivelFiltrar || c.nivel === '(Nivel Abierto)');
+            }
+
             let opcionesClases = '<option value="">-- Selecciona una Clase --</option>';
 
             if (clases.length === 0) {
                 claseSelect.innerHTML = '<option value="">⚠️ Crea primero los horarios en "Clases"</option>';
+            } else if (clasesFiltradas.length === 0) {
+                claseSelect.innerHTML = '<option value="">⚠️ No hay clases para el nivel del alumno</option>';
             } else {
-                clases.sort((a, b) => {
+                clasesFiltradas.sort((a, b) => {
                     const getDia1 = a.tipo === 'unDia' ? a.diaSemana : Object.keys(a.horarios || {}).sort((x, y) => ordenDias[x] - ordenDias[y])[0];
                     const getDia2 = b.tipo === 'unDia' ? b.diaSemana : Object.keys(b.horarios || {}).sort((x, y) => ordenDias[x] - ordenDias[y])[0];
                     return ordenDias[getDia1] - ordenDias[getDia2];
                 });
 
-                clases.forEach(c => {
+                clasesFiltradas.forEach(c => {
                     let etiqueta = '';
                     const duracionTexto = duracionMap.get(String(c.duracion)) || c.duracion;
                     const nivelClase = c.nivel ? `(${c.nivel})` : '(Nivel Abierto)';
@@ -309,17 +329,23 @@
 
                 claseSelect.innerHTML = opcionesClases;
             }
+        }
+
+        async function actualizarSelectorClases() {
+            const alumnoName = alumnoSelect.value;
+            if (!alumnoName) {
+                await poblarClases();
+                return;
+            }
 
             const alumnos = await dataManager.get('alumnosEscuela') || [];
-            // Solo mostrar alumnos cuyo estado sea "Activo"
-            const alumnosActivos = alumnos.filter(a => (a.estado || 'Activo') === 'Activo');
+            const alumnoSeleccionado = alumnos.find(a => `${a.nombre} ${a.apellido}` === alumnoName);
 
-            alumnoSelect.innerHTML = alumnos.length === 0
-                ? '<option value="">⚠️ Registra alumnos primero</option>'
-                : alumnosActivos.length === 0
-                    ? '<option value="">⚠️ No hay alumnos marcados como Activos</option>'
-                    : '<option value="">-- Selecciona el alumno --</option>' + alumnosActivos.map(a => `<option value="${a.nombre} ${a.apellido}">${a.nombre} ${a.apellido}</option>`).join('');
-
+            if (alumnoSeleccionado && alumnoSeleccionado.nivel) {
+                await poblarClases(alumnoSeleccionado.nivel);
+            } else {
+                await poblarClases();
+            }
         }
 
         function getProximasFechas(diaSemana, cantidad = 4) {

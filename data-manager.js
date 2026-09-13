@@ -303,7 +303,7 @@ class DataManager {
             const a = document.createElement('a');
             const fecha = new Date().toISOString().slice(0, 10);
             a.href = url;
-            a.download = `backup-la-gerencia-${fecha}.json`;
+            a.download = `backup-zelai-alai-${fecha}.json`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
