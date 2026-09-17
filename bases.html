@@ -223,27 +223,6 @@
             </table>
         </div>
 
-        <!-- COLUMNA 2: FORMACIÓN ACADÉMICA -->
-        <div class="container" style="border-top: 5px solid #8e44ad;">
-            <h2 style="color: #8e44ad; border-bottom: 2px solid #d7bde2;">🎓 Formación</h2>
-            <form id="formacionForm">
-                <div class="form-group">
-                    <label for="nombreFormacion">Nueva Formación:</label>
-                    <input type="text" id="nombreFormacion" required placeholder="Ej. ESO, Bachillerato...">
-                </div>
-                <button type="submit" style="background-color: #8e44ad;">Añadir Formación</button>
-            </form>
-            <table id="tablaFormaciones" style="margin-top: 25px;">
-                <thead>
-                    <tr>
-                        <th style="background-color: #8e44ad;">Formación</th>
-                        <th style="width: 80px; text-align: center; background-color: #8e44ad;">Acción</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-
         <!-- COLUMNA 3: BONOS -->
         <div class="container" style="border-top: 5px solid #27ae60;">
             <h2 style="color: #27ae60; border-bottom: 2px solid #a2e8c4;">🎟️ Bonos de Clases</h2>
@@ -292,9 +271,17 @@
             </h3>
             <form id="formClase">
                 <input type="hidden" id="servicioId">
-                <div class="form-group">
-                    <label for="nombreClase">Nombre del Servicio:</label>
-                    <input type="text" id="nombreClase" required placeholder="Ej. Clase Suelta, Mensualidad...">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nombreClase">Nombre del Servicio:</label>
+                        <input type="text" id="nombreClase" required placeholder="Ej. Clase Suelta, Mensualidad...">
+                    </div>
+                    <div class="form-group">
+                        <label for="nivelServicio">Nivel:</label>
+                        <select id="nivelServicio">
+                            <option value="">Cualquier nivel</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
@@ -312,6 +299,7 @@
                 <thead>
                     <tr>
                         <th style="background-color: #3498db;">Producto/Servicio</th>
+                        <th style="background-color: #3498db;">Nivel</th>
                         <th style="background-color: #3498db; width: 80px; text-align: center;">Clases</th>
                         <th style="background-color: #3498db; width: 90px; text-align: right;">Precio (€)</th>
                         <th style="width: 80px; text-align: center; background-color: #3498db;">Acción</th>
@@ -493,11 +481,6 @@
         const nombreTipoClaseInput = document.getElementById('nombreTipoClase');
         const tablaTiposClase = document.getElementById('tablaTiposClase').getElementsByTagName('tbody')[0];
 
-        // Formación
-        const formFormacion = document.getElementById('formacionForm');
-        const nombreFormacionInput = document.getElementById('nombreFormacion');
-        const tablaFormaciones = document.getElementById('tablaFormaciones').getElementsByTagName('tbody')[0];
-
         // Productos
         const formBono = document.getElementById('formBono');
         const bonoIdInput = document.getElementById('bonoId');
@@ -510,6 +493,7 @@
         const formClase = document.getElementById('formClase');
         const servicioIdInput = document.getElementById('servicioId');
         const nombreClaseInput = document.getElementById('nombreClase');
+        const nivelServicioInput = document.getElementById('nivelServicio');
         const precioClaseInput = document.getElementById('precioClase');
         const numClasesServicioInput = document.getElementById('numClasesServicio');
         const btnSubmitClase = document.getElementById('btnSubmitClase');
@@ -536,7 +520,6 @@
 
         let ultimaDataNiveles = JSON.stringify([]);
         let ultimaDataTiposClase = JSON.stringify([]);
-        let ultimaDataFormaciones = JSON.stringify([]);
         let ultimaDataEspecialidades = JSON.stringify([]);
         let ultimaDataDuraciones = JSON.stringify([]);
         let ultimaDataGastosCampamento = JSON.stringify([]);
@@ -551,14 +534,11 @@
             if (dataManager.useFirebase) {
                 dataManager.onSnapshot('nivelesEscuela', (data) => {
                     mostrarNiveles(data);
+                    poblarNivelesEnClases(data);
                 });
 
                 dataManager.onSnapshot('tiposClasesEscuela', (data) => {
                     mostrarTiposClase(data);
-                });
-
-                dataManager.onSnapshot('formacionesEscuela', (data) => {
-                    mostrarFormaciones(data);
                 });
 
                 dataManager.onSnapshot('bonosEscuela', (data) => {
@@ -611,16 +591,6 @@
             nombreTipoClaseInput.value = '';
         });
 
-        // Formulario Formación
-        formFormacion.addEventListener('submit', async function (e) {
-            e.preventDefault();
-            const nombre = nombreFormacionInput.value.trim();
-            if (!nombre) return;
-            // Usamos .add() que es más eficiente
-            await dataManager.add('formacionesEscuela', { id: Date.now(), nombre: nombre });
-            nombreFormacionInput.value = '';
-        });
-
         // Formulario Especialidad
         formEspecialidad.addEventListener('submit', async function (e) {
             e.preventDefault();
@@ -670,6 +640,7 @@
             e.preventDefault();
             const id = servicioIdInput.value;
             const nombre = nombreClaseInput.value.trim();
+            const nivel = nivelServicioInput.value;
             const precio = parseFloat(precioClaseInput.value).toFixed(2);
             const numClases = parseInt(numClasesServicioInput.value);
             if (!nombre || isNaN(precio) || isNaN(numClases)) return;
@@ -679,11 +650,11 @@
             }
 
             if (id) {
-                await dataManager.update('clasesSueltasEscuela', id, { nombre, precio, numClases });
+                await dataManager.update('clasesSueltasEscuela', id, { nombre, nivel, precio, numClases });
                 alert('Servicio actualizado.');
             } else {
                 let clases = await dataManager.get('clasesSueltasEscuela') || [];
-                clases.push({ id: Date.now(), nombre, precio, numClases });
+                clases.push({ id: Date.now(), nombre, nivel, precio, numClases });
                 await dataManager.set('clasesSueltasEscuela', clases);
             }
             restablecerFormularioServicio();
@@ -779,19 +750,6 @@
         }
 
 
-        async function mostrarFormaciones(formaciones) {
-            if (!formaciones) formaciones = await dataManager.get('formacionesEscuela') || [];
-            tablaFormaciones.innerHTML = '';
-            if (formaciones.length === 0) {
-                tablaFormaciones.innerHTML = `<tr><td colspan="2" class="no-records">No hay formaciones registradas.</td></tr>`;
-                return;
-            }
-            formaciones.forEach(f => {
-                const fila = tablaFormaciones.insertRow();
-                fila.innerHTML = `<td><b>${f.nombre}</b></td><td style="text-align:center;"><button class="btn-delete" onclick="eliminarFormacion(${f.id})">Eliminar</button></td>`;
-            });
-        }
-
         async function mostrarBonos(bonos) {
             if (!bonos) bonos = await dataManager.get('bonosEscuela') || [];
             tablaBonos.innerHTML = '';
@@ -817,13 +775,14 @@
             if (!clases) clases = await dataManager.get('clasesSueltasEscuela') || [];
             tablaClases.innerHTML = '';
             if (clases.length === 0) {
-                tablaClases.innerHTML = `<tr><td colspan="4" class="no-records">No hay clases sueltas.</td></tr>`;
+                tablaClases.innerHTML = `<tr><td colspan="5" class="no-records">No hay clases sueltas.</td></tr>`;
                 return;
             }
             clases.forEach(p => {
                 const fila = tablaClases.insertRow();
                 fila.innerHTML = `
                     <td><b>${p.nombre}</b></td>
+                    <td>${p.nivel || 'Cualquier nivel'}</td>
                     <td style="text-align:center;">${p.numClases || '-'}</td>
                     <td style="text-align:right;">${p.precio} €</td>
                     <td style="text-align:center; display:flex; gap:5px;">
@@ -942,9 +901,17 @@
             if (!clase) return;
             servicioIdInput.value = clase.id;
             nombreClaseInput.value = clase.nombre;
+            nivelServicioInput.value = clase.nivel || '';
             precioClaseInput.value = clase.precio;
             numClasesServicioInput.value = clase.numClases || 1;
             btnSubmitClase.textContent = 'Actualizar Servicio';
+        }
+
+        async function poblarNivelesEnClases(niveles) {
+            const valorActual = nivelServicioInput.value;
+            nivelServicioInput.innerHTML = '<option value="">Cualquier nivel</option>' +
+                niveles.map(n => `<option value="${n.nombre}">${n.nombre}</option>`).join('');
+            if (valorActual) nivelServicioInput.value = valorActual;
         }
 
         function restablecerFormularioBono() {
@@ -1020,12 +987,6 @@
         async function eliminarTipoClase(id) {
             if (confirm('¿Deseas eliminar este tipo de clase?')) {
                 await dataManager.delete('tiposClasesEscuela', id);
-            }
-        }
-
-        async function eliminarFormacion(id) {
-            if (confirm('¿Deseas eliminar esta formación?')) {
-                await dataManager.delete('formacionesEscuela', id);
             }
         }
 

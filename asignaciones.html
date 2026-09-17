@@ -478,7 +478,8 @@
                 card.className = 'clase-card';
                 card.id = `clase-card-${grupo.clase.id}-${grupo.dia}`; // Añadir ID para el scroll
                 const fechaFormateada = new Date(grupo.dia + 'T12:00:00').toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
-                const etiqueta = `🗓️ ${fechaFormateada} a las ${grupo.clase.hora} hs`;
+                const nivelTexto = grupo.clase.nivel ? ` - 🎓 ${grupo.clase.nivel}` : '';
+                const etiqueta = `🗓️ ${fechaFormateada} a las ${grupo.clase.hora} hs${nivelTexto}`;
 
                 let htmlContenido = `
                 <div class="clase-header">

@@ -284,7 +284,7 @@ class DataManager {
             'alumnosEscuela', 'caballosEscuela', 'profesoresEscuela', 'clasesEscuela', 'asignacionesEscuela',
             'nivelesEscuela', 'tiposClasesEscuela', 'bonosEscuela', 'clasesSueltasEscuela',
             'pagosAlumnosEscuela', 'attendanceEscuela', 'especialidadesProfesoresEscuela',
-            'alimentacionCaballosEscuela', 'vacunasCaballosEscuela', 'desparasitacionCaballosEscuela', 'inscripcionesCampamento', 'agendaCaballosEscuela', 'cursosEscuela', 'herrajesCaballosEscuela', 'formacionesEscuela', 'otrosServiciosEscuela', 'duracionesEscuela', 'conceptosGastoCampamento', 'fechasCampamento', 'conceptosGasto',
+            'alimentacionCaballosEscuela', 'vacunasCaballosEscuela', 'desparasitacionCaballosEscuela', 'inscripcionesCampamento', 'agendaCaballosEscuela', 'cursosEscuela', 'herrajesCaballosEscuela', 'otrosServiciosEscuela', 'duracionesEscuela', 'conceptosGastoCampamento', 'fechasCampamento', 'conceptosGasto',
             'gastosHipica',
             'preciosCampamento',
             'bancoCampamento'
@@ -360,7 +360,7 @@ class DataManager {
             'alumnosEscuela', 'caballosEscuela', 'profesoresEscuela', 'clasesEscuela', 'asignacionesEscuela',
             'nivelesEscuela', 'tiposClasesEscuela', 'bonosEscuela', 'clasesSueltasEscuela',
             'pagosAlumnosEscuela', 'attendanceEscuela', 'especialidadesProfesoresEscuela',
-            'alimentacionCaballosEscuela', 'vacunasCaballosEscuela', 'desparasitacionCaballosEscuela', 'inscripcionesCampamento', 'agendaCaballosEscuela', 'cursosEscuela', 'herrajesCaballosEscuela', 'formacionesEscuela', 'otrosServiciosEscuela', 'duracionesEscuela', 'conceptosGastoCampamento', 'fechasCampamento', 'conceptosGasto',
+            'alimentacionCaballosEscuela', 'vacunasCaballosEscuela', 'desparasitacionCaballosEscuela', 'inscripcionesCampamento', 'agendaCaballosEscuela', 'cursosEscuela', 'herrajesCaballosEscuela', 'otrosServiciosEscuela', 'duracionesEscuela', 'conceptosGastoCampamento', 'fechasCampamento', 'conceptosGasto',
             'gastosHipica',
             'preciosCampamento',
             'bancoCampamento'

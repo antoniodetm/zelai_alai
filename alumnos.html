@@ -279,7 +279,6 @@
                     <tr>
                         <th>Nombre / Izena</th>
                         <th>Apellidos / Abizenak</th>
-                        <th>Próxima Clase</th>
                         <th>Último Producto</th>
                         <th style="text-align:center;">Al Corriente</th>
                         <th style="text-align:center;">Estado</th>
@@ -787,12 +786,10 @@
             const normalizar = (texto) => (texto || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
             const filtro = normalizar(searchInput);
 
-            const [alumnos, pagos, asistencia, asignaciones, todasLasClases] = await Promise.all([
+            const [alumnos, pagos, asistencia] = await Promise.all([
                 dataManager.get('alumnosEscuela'),
                 dataManager.get('pagosAlumnosEscuela'),
-                dataManager.get('attendanceEscuela'),
-                dataManager.get('asignacionesEscuela'),
-                dataManager.get('clasesEscuela')
+                dataManager.get('attendanceEscuela')
             ]);
 
             tabla.innerHTML = '';
@@ -818,19 +815,10 @@
                 if (tieneBonoActivo || haPagadoEsteMes) alCorrienteHtml = '✅';
                 else if (misPagos.length > 0) alCorrienteHtml = '❌';
 
-                const ahora = new Date();
-                const proximaAsignacion = (asignaciones || [])
-                    .filter(asig => {
-                        const claseInfo = (todasLasClases || []).find(c => c.id == asig.claseId);
-                        return asig.alumno === nombreCompleto && new Date(`${asig.dia}T${claseInfo?.hora || '00:00'}`) >= ahora;
-                    })
-                    .sort((x, y) => new Date(x.dia) - new Date(y.dia))[0];
-                const proximaClaseTexto = proximaAsignacion ? new Date(proximaAsignacion.dia + 'T12:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) : '---';
-
                 const fila = tabla.insertRow();
                 fila.innerHTML = `
                     <td>${a.nombre}</td><td>${a.apellido}</td>
-                    <td>${proximaClaseTexto}</td><td>${ultimoProducto}</td>
+                    <td>${ultimoProducto}</td>
                     <td style="text-align:center;">${alCorrienteHtml}</td>
                     <td style="text-align:center;">${a.estado || 'Activo'}</td>
                     <td class="actions-cell">
@@ -1073,6 +1061,7 @@
             const alumno = alumnos.find(a => a.id == alumnoId);
             document.getElementById('nombreAlumnoProductos').textContent = `${alumno.nombre} ${alumno.apellido}`;
             document.getElementById('productoAlumnoId').value = alumnoId;
+            document.getElementById('modalProductos').dataset.nivelAlumno = alumno.nivel || '';
             document.getElementById('categoriaProductoSelect').value = '';
             document.getElementById('tablaProductosDisponibles').style.display = 'none';
             await mostrarProductosDeAlumno(alumnoId);
@@ -1083,16 +1072,23 @@
             const cat = e.target.value;
             if (!cat) return;
             const tablaProd = document.getElementById('tablaProductosDisponibles');
+            const nivelAlumno = document.getElementById('modalProductos').dataset.nivelAlumno;
             tablaProd.style.display = 'block';
             let prods = [];
             let tipo = '';
             if (cat === 'bonos') { prods = await dataManager.get('bonosEscuela'); tipo = 'Bono'; }
-            else if (cat === 'clases') { prods = await dataManager.get('clasesSueltasEscuela'); tipo = 'Clase Suelta'; }
+            else if (cat === 'clases') {
+                prods = await dataManager.get('clasesSueltasEscuela');
+                tipo = 'Clase Suelta';
+                if (nivelAlumno) {
+                    prods = prods.filter(p => !p.nivel || p.nivel === nivelAlumno);
+                }
+            }
             else if (cat === 'cursos') { prods = await dataManager.get('cursosEscuela'); tipo = 'Curso'; }
             else if (cat === 'otros') { prods = await dataManager.get('otrosServiciosEscuela'); tipo = 'Otro'; }
 
             tablaProd.innerHTML = `<table><thead><tr><th>Nombre</th><th>Precio</th><th></th></tr></thead><tbody>` +
-                prods.map(p => `<tr><td>${p.nombre}</td><td>${p.precio}€</td><td><button onclick="addProductoToAlumno(this)" data-id="${p.id}" data-nombre="${p.nombre}" data-precio="${p.precio}" data-tipo="${tipo}" data-clases="${p.numClases || 0}" data-duracion="${p.duracion || 0}">Añadir</button></td></tr>`).join('') +
+                prods.map(p => `<tr><td>${p.nombre} ${p.nivel ? `(${p.nivel})` : ''}</td><td>${p.precio}€</td><td><button onclick="addProductoToAlumno(this)" data-id="${p.id}" data-nombre="${p.nombre}" data-precio="${p.precio}" data-tipo="${tipo}" data-clases="${p.numClases || 0}" data-duracion="${p.duracion || 0}">Añadir</button></td></tr>`).join('') +
                 `</tbody></table>`;
         };
 
