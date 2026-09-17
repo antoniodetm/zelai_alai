@@ -208,6 +208,50 @@
     </div>
 
     <script>
+        const API_KEY_AEMET = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbnRvbmlvZGV0bUBnbWFpbC5jb20iLCJqdGkiOiIzZTcxNTZmNC05YzZiLTQyMDMtYmE2YS0zZTRiYTAxMmQxNDUiLCJleHAiOjE3OTU1MDI1OTksImlzcyI6IkFFTUVUIiwiaWF0IjoxNzg2ODYyNTk5LCJ1c2VySWQiOiIzZTcxNTZmNC05YzZiLTQyMDMtYmE2YS0zZTRiYTAxMmQxNDUiLCJyb2xlIjoiIn0.PhW1cv27D88wKrZb2kFFP2NqQVmy23h35uiYjVTjqFY';
+        const ID_MUNICIPIO_IURRETA = '48910';
+        let weatherCache = null;
+        const weatherIcons = { 0: "☀️", 1: "🌤️", 2: "⛅", 3: "☁️", 45: "🌫️", 51: "🌦️", 61: "🌧️", 80: "🌦️", 95: "⛈️" };
+        const aemetToWmo = { "11": 0, "11n": 0, "12": 1, "12n": 1, "13": 2, "13n": 2, "14": 3, "14n": 3, "15": 3, "15n": 3, "16": 3, "16n": 3, "17": 2, "17n": 2, "43": 51, "44": 51, "45": 61, "46": 61, "23": 51, "24": 61, "25": 61, "26": 61, "81": 45, "82": 45, "51": 95, "52": 95, "53": 95, "54": 95, "61": 95, "62": 95, "63": 95, "64": 95 };
+
+        async function fetchAemetData(url) {
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                if (data.estado === 200) {
+                    const resDatos = await fetch(data.datos);
+                    return await resDatos.json();
+                }
+            } catch (e) { console.error("Error AEMET:", e); }
+            return null;
+        }
+
+        async function cargarPrevisionTiempo() {
+            if (weatherCache) return weatherCache;
+            const url = `https://opendata.aemet.es/opendata/api/prediccion/especifica/municipio/diaria/${ID_MUNICIPIO_IURRETA}/?api_key=${API_KEY_AEMET}`;
+            const data = await fetchAemetData(url);
+            if (data && data[0]) {
+                weatherCache = data[0].prediccion.dia.map(dia => ({
+                    fecha: dia.fecha.substring(0, 10),
+                    estado: dia.estadoCielo[0]?.value || "11",
+                    tempMax: dia.temperatura.maxima,
+                    tempMin: dia.temperatura.minima,
+                    probPrecip: Math.max(...dia.probPrecipitacion.map(p => p.value || 0))
+                }));
+                return weatherCache;
+            }
+            return [];
+        }
+
+        function getIconoTiempo(fecha) {
+            if (!weatherCache) return "";
+            const dia = weatherCache.find(d => d.fecha === fecha);
+            if (!dia) return "";
+            const wmoCode = aemetToWmo[dia.estado.replace('n', '')] || 1;
+            const icono = weatherIcons[wmoCode] || "🌤️";
+            return `<span title="Previsión: ${dia.tempMin}/${dia.tempMax}°C, Lluvia: ${dia.probPrecip}%">${icono} ${dia.tempMax}°</span>`;
+        }
+
         const form = document.getElementById('asignacionForm');
         const listaGrupos = document.getElementById('listaGrupos');
         const claseSelect = document.getElementById('claseSelect');
@@ -222,6 +266,7 @@
 
         window.onload = async function () {
             await dataManager.initPromise;
+            await cargarPrevisionTiempo(); // Cargar el tiempo al inicio
             alumnoSelect.addEventListener('change', actualizarSelectorClases);
             claseSelect.addEventListener('change', actualizarSelectorFecha);
             console.log('DataManager inicializado:', dataManager.useFirebase ? 'Firebase' : 'localStorage');
@@ -378,8 +423,11 @@
                 const fechas = getProximasFechas(claseSeleccionada.diaSemana);
                 opcionesFechas += fechas.map(f => {
                     const valor = f.toISOString().split('T')[0];
-                    const texto = f.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-                    return `<option value="${valor}">${texto}</option>`;
+                    const textoBase = f.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+                    // Buscar si hay clima para esta fecha
+                    const infoClima = weatherCache ? weatherCache.find(d => d.fecha === valor) : null;
+                    const textoClima = infoClima ? ` (${weatherIcons[aemetToWmo[infoClima.estado.replace('n', '')] || 1]} ${infoClima.tempMax}°)` : '';
+                    return `<option value="${valor}">${textoBase}${textoClima}</option>`;
                 }).join('');
             }
 
@@ -479,7 +527,8 @@
                 card.id = `clase-card-${grupo.clase.id}-${grupo.dia}`; // Añadir ID para el scroll
                 const fechaFormateada = new Date(grupo.dia + 'T12:00:00').toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
                 const nivelTexto = grupo.clase.nivel ? ` - 🎓 ${grupo.clase.nivel}` : '';
-                const etiqueta = `🗓️ ${fechaFormateada} a las ${grupo.clase.hora} hs${nivelTexto}`;
+                const climaHtml = getIconoTiempo(grupo.dia);
+                const etiqueta = `🗓️ ${fechaFormateada} a las ${grupo.clase.hora} hs${nivelTexto} ${climaHtml}`;
 
                 let htmlContenido = `
                 <div class="clase-header">
