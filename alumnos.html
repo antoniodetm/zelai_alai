@@ -527,12 +527,12 @@
 
                 <div class="form-group wide">
                     <label>Firma / Sinadura:</label>
-                    <div style="border: 2px dashed #ccc; background: #f9f9f9; border-radius: 4px; position: relative;">
-                        <canvas id="signatureCanvas" width="500" height="150"
-                            style="display: block; width: 100%; height: 150px; cursor: crosshair;"></canvas>
-                        <button type="button" onclick="clearSignature()"
-                            style="position: absolute; top: 5px; right: 5px; padding: 5px 10px; font-size: 10px; width: auto; margin: 0; background: #7f8c8d;">Limpiar
-                            / Garbitu</button>
+                    <div id="firmaContainer" onclick="abrirModalFirma()"
+                        style="border: 2px dashed #ccc; background: #f9f9f9; border-radius: 4px; position: relative; min-height: 100px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                        <img id="signaturePreview" style="max-width: 100%; max-height: 150px; display: none;">
+                        <div id="signaturePlaceholder" style="color: #7f8c8d; text-align: center;">
+                            Haga clic aquí para firmar / Egin klik hemen sinatzeko
+                        </div>
                     </div>
                     <input type="hidden" id="signatureData">
                 </div>
@@ -663,7 +663,7 @@
             <p><strong>Destinatarios de cesiones o transferencias:</strong><br>
                 CLUB DEPORTIVO DE HIPICA AZCORRA DE IURRETA No comunicará sus datos a terceros, salvo obligación legal.
                 Sus datos podrán ser comunicados: a) A las Administraciones Públicas Competentes, en su caso a Bancos/
-                Cajas de Ahorro, y a todas aquellas entidades que la legislación vigente nos exija; b) A entidades
+                Cajas de Ahorro, and a todas aquellas entidades que la legislación vigente nos exija; b) A entidades
                 sanitarias, en el caso de que el alumno participante se encuentre en situación de necesitar
                 tratamiento-intervención médica.</p>
 
@@ -680,6 +680,25 @@
         </div>
     </div>
 
+    <div id="modalFirma" class="modal">
+        <div class="modal-content" style="width: 600px; max-width: 95%;">
+            <span class="close" onclick="cerrarModalFirma()">&times;</span>
+            <h3 style="margin-top: 0; color: #4a3728;">Dibuje su firma / Sinatu hemen</h3>
+            <div
+                style="border: 2px dashed #ccc; background: #f9f9f9; border-radius: 4px; position: relative; margin-top: 15px;">
+                <canvas id="signatureCanvas" width="600" height="300"
+                    style="display: block; width: 100%; height: auto; cursor: crosshair; touch-action: none;"></canvas>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button type="button" onclick="clearSignature()"
+                    style="background: #7f8c8d; margin: 0;">Limpiar</button>
+                <button type="button" onclick="aceptarFirma()" style="background: #27ae60; margin: 0;">Aceptar</button>
+                <button type="button" onclick="cerrarModalFirma()"
+                    style="background: #e74c3c; margin: 0;">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <script src="data-manager.js?v=1.5"></script>
     <script>
         const form = document.getElementById('alumnoForm');
@@ -692,26 +711,39 @@
         const canvas = document.getElementById('signatureCanvas');
         const ctx = canvas.getContext('2d');
         let drawing = false;
+        let lastPos = { x: 0, y: 0 };
 
         // Signature logic
         function getMousePos(canvasDom, touchOrMouseEvent) {
             var rect = canvasDom.getBoundingClientRect();
-            var x = (touchOrMouseEvent.clientX || touchOrMouseEvent.touches[0].clientX) - rect.left;
-            var y = (touchOrMouseEvent.clientY || touchOrMouseEvent.touches[0].clientY) - rect.top;
-            return { x: x, y: y };
+            var x, y;
+            if (touchOrMouseEvent.touches && touchOrMouseEvent.touches.length > 0) {
+                x = touchOrMouseEvent.touches[0].clientX - rect.left;
+                y = touchOrMouseEvent.touches[0].clientY - rect.top;
+            } else {
+                x = touchOrMouseEvent.clientX - rect.left;
+                y = touchOrMouseEvent.clientY - rect.top;
+            }
+            // Scale if needed (for CSS scaling)
+            const scaleX = canvasDom.width / rect.width;
+            const scaleY = canvasDom.height / rect.height;
+            return { x: x * scaleX, y: y * scaleY };
         }
 
         canvas.addEventListener("mousedown", function (e) {
             drawing = true;
             lastPos = getMousePos(canvas, e);
+            ctx.beginPath();
+            ctx.moveTo(lastPos.x, lastPos.y);
         }, false);
+
         canvas.addEventListener("mouseup", function (e) {
             drawing = false;
         }, false);
+
         canvas.addEventListener("mousemove", function (e) {
-            mousePos = getMousePos(canvas, e);
             if (drawing) {
-                ctx.moveTo(lastPos.x, lastPos.y);
+                const mousePos = getMousePos(canvas, e);
                 ctx.lineTo(mousePos.x, mousePos.y);
                 ctx.stroke();
                 lastPos = mousePos;
@@ -720,31 +752,73 @@
 
         // Touch support
         canvas.addEventListener("touchstart", function (e) {
-            mousePos = getMousePos(canvas, e);
-            var touch = e.touches[0];
-            var mouseEvent = new MouseEvent("mousedown", {
+            if (e.target === canvas) e.preventDefault();
+            const pos = getMousePos(canvas, e);
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent("mousedown", {
                 clientX: touch.clientX,
                 clientY: touch.clientY
             });
             canvas.dispatchEvent(mouseEvent);
-        }, false);
+        }, { passive: false });
+
         canvas.addEventListener("touchend", function (e) {
-            var mouseEvent = new MouseEvent("mouseup", {});
+            const mouseEvent = new MouseEvent("mouseup", {});
             canvas.dispatchEvent(mouseEvent);
         }, false);
+
         canvas.addEventListener("touchmove", function (e) {
-            var touch = e.touches[0];
-            var mouseEvent = new MouseEvent("mousemove", {
+            if (e.target === canvas) e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent("mousemove", {
                 clientX: touch.clientX,
                 clientY: touch.clientY
             });
             canvas.dispatchEvent(mouseEvent);
-        }, false);
+        }, { passive: false });
 
         function clearSignature() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.beginPath();
-            document.getElementById('signatureData').value = '';
+        }
+
+        function abrirModalFirma() {
+            document.getElementById('modalFirma').style.display = 'block';
+            document.body.style.overflow = 'hidden'; // Bloquear scroll
+            // Redimensionar canvas si es necesario o limpiar para nueva firma
+            clearSignature();
+            // Si ya había una firma, podríamos cargarla, pero el usuario suele querer firmar de nuevo
+            const currentData = document.getElementById('signatureData').value;
+            if (currentData) {
+                const img = new Image();
+                img.onload = function () { ctx.drawImage(img, 0, 0); };
+                img.src = currentData;
+            }
+        }
+
+        function cerrarModalFirma() {
+            document.getElementById('modalFirma').style.display = 'none';
+            document.body.style.overflow = 'auto'; // Habilitar scroll
+        }
+
+        function aceptarFirma() {
+            const isCanvasEmpty = ctx.getImageData(0, 0, canvas.width, canvas.height).data.every(p => p === 0);
+            const signatureDataInput = document.getElementById('signatureData');
+            const signaturePreview = document.getElementById('signaturePreview');
+            const signaturePlaceholder = document.getElementById('signaturePlaceholder');
+
+            if (!isCanvasEmpty) {
+                const dataUrl = canvas.toDataURL();
+                signatureDataInput.value = dataUrl;
+                signaturePreview.src = dataUrl;
+                signaturePreview.style.display = 'block';
+                signaturePlaceholder.style.display = 'none';
+            } else {
+                signatureDataInput.value = '';
+                signaturePreview.style.display = 'none';
+                signaturePlaceholder.style.display = 'block';
+            }
+            cerrarModalFirma();
         }
 
         function calcularEdad(fecha) {
@@ -838,9 +912,8 @@
             const id = alumnoIdInput.value;
             const formaPago = document.querySelector('input[name="formaPago"]:checked').value;
 
-            // Save signature data
-            const signatureData = canvas.toDataURL();
-            const isCanvasEmpty = ctx.getImageData(0, 0, canvas.width, canvas.height).data.every(p => p === 0);
+            // Save signature data from hidden input
+            const signatureData = document.getElementById('signatureData').value;
 
             const alumnoData = {
                 id: id ? id : Date.now(),
@@ -865,7 +938,7 @@
                 aceptoImagen: document.getElementById('aceptoImagen').checked,
                 aceptoNormativa: document.getElementById('aceptoNormativa').checked,
                 fechaFirma: document.getElementById('fechaFirma').value,
-                signature: isCanvasEmpty ? '' : signatureData,
+                signature: signatureData,
                 // Tutor
                 tutorDni: document.getElementById('tutorDni').value.trim(),
                 tutorNombre: document.getElementById('tutorNombre').value.trim(),
@@ -904,6 +977,9 @@
             toggleTutorSection();
             domiciliacionSection.style.display = 'none';
             document.getElementById('fechaFirma').valueAsDate = new Date();
+            document.getElementById('signatureData').value = '';
+            document.getElementById('signaturePreview').style.display = 'none';
+            document.getElementById('signaturePlaceholder').style.display = 'block';
             clearSignature();
         }
 
@@ -934,11 +1010,23 @@
                 document.getElementById('aceptoNormativa').checked = a.aceptoNormativa || false;
                 document.getElementById('fechaFirma').value = a.fechaFirma || '';
 
+                const signaturePreview = document.getElementById('signaturePreview');
+                const signaturePlaceholder = document.getElementById('signaturePlaceholder');
+                const signatureDataInput = document.getElementById('signatureData');
+
                 if (a.signature) {
+                    signatureDataInput.value = a.signature;
+                    signaturePreview.src = a.signature;
+                    signaturePreview.style.display = 'block';
+                    signaturePlaceholder.style.display = 'none';
+                    // También dibujamos en el canvas del modal por si quiere editarla
                     var img = new Image();
                     img.onload = function () { ctx.drawImage(img, 0, 0); };
                     img.src = a.signature;
                 } else {
+                    signatureDataInput.value = '';
+                    signaturePreview.style.display = 'none';
+                    signaturePlaceholder.style.display = 'block';
                     clearSignature();
                 }
 
